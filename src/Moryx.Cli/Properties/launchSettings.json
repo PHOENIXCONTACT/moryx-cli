@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Moryx.Cli": {
+      "commandName": "Project"
+    }
+  }
+}

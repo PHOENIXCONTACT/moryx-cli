@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli", "src\Moryx.Cli\Moryx.Cli.csproj", "{13F36F0F-F879-4A52-99AE-ABF895F2D375}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Tests", "src\Moryx.Cli.Tests\Moryx.Cli.Tests.csproj", "{E65D2591-A889-4F42-A6F5-AECAFB77DBB0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Commands", "src\Moryx.Cli.Commands\Moryx.Cli.Commands.csproj", "{A05301A2-A68F-40BE-8ED9-0A8DF0CECFCE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moryx.Cli.Template", "src\Moryx.Cli.Template\Moryx.Cli.Template.csproj", "{FDE96997-1492-4FC1-AE66-E7F76A7B8374}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moryx.Cli.Config", "src\Moryx.Cli.Config\Moryx.Cli.Config.csproj", "{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13F36F0F-F879-4A52-99AE-ABF895F2D375}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13F36F0F-F879-4A52-99AE-ABF895F2D375}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13F36F0F-F879-4A52-99AE-ABF895F2D375}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13F36F0F-F879-4A52-99AE-ABF895F2D375}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E65D2591-A889-4F42-A6F5-AECAFB77DBB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E65D2591-A889-4F42-A6F5-AECAFB77DBB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E65D2591-A889-4F42-A6F5-AECAFB77DBB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E65D2591-A889-4F42-A6F5-AECAFB77DBB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A05301A2-A68F-40BE-8ED9-0A8DF0CECFCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A05301A2-A68F-40BE-8ED9-0A8DF0CECFCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A05301A2-A68F-40BE-8ED9-0A8DF0CECFCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A05301A2-A68F-40BE-8ED9-0A8DF0CECFCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDE96997-1492-4FC1-AE66-E7F76A7B8374}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDE96997-1492-4FC1-AE66-E7F76A7B8374}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDE96997-1492-4FC1-AE66-E7F76A7B8374}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDE96997-1492-4FC1-AE66-E7F76A7B8374}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {99BD1616-551D-473A-A6DB-6A9C0F030AB7}
+	EndGlobalSection
+EndGlobal
