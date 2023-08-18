@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Tests", "src\Mory
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Commands", "src\Moryx.Cli.Commands\Moryx.Cli.Commands.csproj", "{A05301A2-A68F-40BE-8ED9-0A8DF0CECFCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moryx.Cli.Template", "src\Moryx.Cli.Template\Moryx.Cli.Template.csproj", "{FDE96997-1492-4FC1-AE66-E7F76A7B8374}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Template", "src\Moryx.Cli.Template\Moryx.Cli.Template.csproj", "{FDE96997-1492-4FC1-AE66-E7F76A7B8374}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moryx.Cli.Config", "src\Moryx.Cli.Config\Moryx.Cli.Config.csproj", "{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Config", "src\Moryx.Cli.Config\Moryx.Cli.Config.csproj", "{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
