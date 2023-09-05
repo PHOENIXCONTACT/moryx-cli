@@ -78,15 +78,11 @@ namespace Moryx.Cli.Template
 
         public static List<string> Step(this List<string> list)
         {
-            var whitelist = new List<string>(){
-                "SomeCapabilities",
-                "SomeActivity.cs",
-                "SomeActivityResults.cs",
-                "SomeParameters.cs",
-                "SomeTask.cs",
-                "ISomeResource.cs",
-                "SomeCell.cs",
-            };
+            var whitelist = list
+                .Where(e => e.Contains("Some"))
+                .ToList();
+            whitelist.Add("SimulatedInOutDriver.cs");
+
             return list
                 .Intersect(whitelist, new ListComparer())
                 .ToList();
