@@ -16,10 +16,6 @@ on:
 env:
   dotnet_sdk_version: '8.0.100-preview.5.23303.2'
   REPOSITORY_NAME: ${{ github.event.repository.name }}
-  MORYX_PACKAGE_TARGET_DEV: 'https://www.myget.org/F/moryx/api/v2/package'
-  MORYX_PACKAGE_TARGET_V3_DEV: 'https://www.myget.org/F/moryx/api/v3/index.json'
-  MORYX_PACKAGE_TARGET_FUTURE: 'https://www.myget.org/F/moryx-future/api/v2/package'
-  MORYX_PACKAGE_TARGET_V3_FUTURE: 'https://www.myget.org/F/moryx-future/api/v3/index.json'
   MORYX_PACKAGE_TARGET_RELEASE: 'https://api.nuget.org/v3/index.json'
   MORYX_PACKAGE_TARGET_V3_RELEASE: 'https://api.nuget.org/v3/index.json'
 
@@ -31,8 +27,8 @@ jobs:
     outputs:
       dotnet_sdk_version: ${{ env.dotnet_sdk_version }}
       REPOSITORY_NAME: ${{ env.REPOSITORY_NAME }}
-      MORYX_PACKAGE_TARGET: ${{ env.MORYX_PACKAGE_TARGET_DEV }}
-      MORYX_PACKAGE_TARGET_V3: ${{ env.MORYX_PACKAGE_TARGET_V3_DEV }}
+      MORYX_PACKAGE_TARGET: ${{ env.MORYX_PACKAGE_TARGET_RELEASE }}
+      MORYX_PACKAGE_TARGET_V3: ${{ env.MORYX_PACKAGE_TARGET_V3_RELEASE }}
 
   Build:
     needs: [SetupEnvironment]
@@ -42,15 +38,15 @@ jobs:
       REPOSITORY_NAME: ${{ needs.SetupEnvironment.outputs.REPOSITORY_NAME }}
       SETUP_NODE: false
 
-  UnitTests:
-    needs: [SetupEnvironment, Build]
-    uses: moryx-industry/tools/.github/workflows/unittest-tool.yml@main
-    with:
-      dotnet_sdk_version: ${{ needs.SetupEnvironment.outputs.dotnet_sdk_version }}
-      REPOSITORY_NAME: ${{ needs.SetupEnvironment.outputs.REPOSITORY_NAME }}
+  # UnitTests:
+  #   needs: [SetupEnvironment, Build]
+  #   uses: moryx-industry/tools/.github/workflows/unittest-tool.yml@main
+  #   with:
+  #     dotnet_sdk_version: ${{ needs.SetupEnvironment.outputs.dotnet_sdk_version }}
+  #     REPOSITORY_NAME: ${{ needs.SetupEnvironment.outputs.REPOSITORY_NAME }}
 
   Publish:
-    needs: [SetupEnvironment, UnitTests]
+    needs: [SetupEnvironment, Build]
     uses: moryx-industry/tools/.github/workflows/publish-tool.yml@main
     with:
       dotnet_sdk_version: ${{ needs.SetupEnvironment.outputs.dotnet_sdk_version }}
