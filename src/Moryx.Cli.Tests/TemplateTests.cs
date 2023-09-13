@@ -45,7 +45,7 @@ namespace Moryx.Cli.Tests
             var list = _resourceNames
                 .WithoutStep();
 
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 7));
+            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 10));
         }        
         
         [Test]
@@ -90,7 +90,7 @@ namespace Moryx.Cli.Tests
             var list = _resourceNames
                 .Step();
 
-            Assert.That(list, Has.Count.EqualTo(7));
+            Assert.That(list, Has.Count.EqualTo(10));
         }
 
         [Test]
@@ -158,7 +158,7 @@ namespace Moryx.Cli.Tests
             var fileStructure = Template.Template.PrepareFileStructure(SolutionName, filteredResourceNames, projects);
 
             var flattened = fileStructure.SelectMany(item => item.Value);
-            Assert.That(flattened.Count, Is.EqualTo(32));
+            Assert.That(flattened.Count, Is.EqualTo(29));
         }
 
         [Test]
@@ -167,7 +167,7 @@ namespace Moryx.Cli.Tests
             var resourceNames = _resourceNames;
             var filteredResourceNames = resourceNames.BareProjectFiles();
 
-            Assert.That(filteredResourceNames, Has.Count.EqualTo(32));
+            Assert.That(filteredResourceNames, Has.Count.EqualTo(29));
         }
     }
 }
