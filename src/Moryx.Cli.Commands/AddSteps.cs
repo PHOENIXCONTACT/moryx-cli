@@ -8,7 +8,7 @@ namespace Moryx.Cli.Commands
     {
         public static CommandResult Exec(TemplateSettings settings, IEnumerable<string> cells)
         {
-            return CommandBase.Exec(settings, (filenames) 
+            return CommandBase.Exec(settings, (fileNames) 
                 => cells.Select(step => AddThing.Exec(
                     settings,
                     new AddConfig
@@ -18,7 +18,7 @@ namespace Moryx.Cli.Commands
                         Thing = "step",
                         ThingPlaceholder = Template.Template.StepPlaceholder,
                     },
-                    filenames.Step()
+                    fileNames.Step()
                     ))
                     .ToArray()
                     .Flatten());

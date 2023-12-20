@@ -7,13 +7,13 @@ namespace Moryx.Cli.Commands
     {
         public static CommandResult Exec(TemplateSettings settings, AddConfig config, List<string> resourceNames, Action<IEnumerable<string>>? onAddedFiles = null)
         {
-            return CommandBase.Exec(settings, (filenames) =>
+            return CommandBase.Exec(settings, (fileNames) =>
             {
-                var projectFilenames = filenames.InitialProjects();
+                var projectFileNames = fileNames.InitialProjects();
 
                 try
                 {
-                    var dictionary = Template.Template.PrepareFileStructure(config.SolutionName, resourceNames, projectFilenames);
+                    var dictionary = Template.Template.PrepareFileStructure(config.SolutionName, resourceNames, projectFileNames);
 
                     var files = Template.Template.WriteFilesToDisk(
                         dictionary,
