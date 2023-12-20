@@ -1,6 +1,4 @@
 ﻿using Moryx.Cli.Template.Models;
-using System.Diagnostics.CodeAnalysis;
-
 
 namespace Moryx.Cli.Template
 {
@@ -103,11 +101,10 @@ namespace Moryx.Cli.Template
         {
             return list
                 .Where(s => s.EndsWith(".csproj"))
-                .Select(s => ExtractProjectInfo(s))
-                .Where(s => s != null)
+                .Select(ExtractProjectInfo)
                 .Select(f => new ProjectFileInfo
                 {
-                    Name = f!.Name,
+                    Name = f.Name,
                     Filename = f.Filename,
                     Extension = f.Extension,
                 })
@@ -147,7 +144,7 @@ namespace Moryx.Cli.Template
         }
 
         private static ProjectFileInfo ExtractProjectInfo(string str)
-            => new ProjectFileInfo
+            => new()
             {
                 Name = Path.GetFileNameWithoutExtension(str),
                 Filename = str,
@@ -175,16 +172,16 @@ namespace Moryx.Cli.Template
             await File.WriteAllTextAsync(file, text);
         }
 
-        public static Dictionary<ProjectFileInfo, List<string>> PrepareFileStructure(string solution, List<string> cleanedResourceNames, List<ProjectFileInfo> projectFilenames)
+        public static Dictionary<ProjectFileInfo, List<string>> PrepareFileStructure(string solution, List<string> cleanedResourceNames, List<ProjectFileInfo> projectFileNames)
         {
             var dictionary = new Dictionary<ProjectFileInfo, List<string>>();
 
             // Reverse list to avoid problems with similar project names
             // e.g. Moryx.App vs Moryx.App.Plus
-            var reverseFilenames = projectFilenames
+            var reverseFileNames = projectFileNames
                 .OrderByDescending(x => x.Name)
                 .ToList();
-            foreach (var project in reverseFilenames)
+            foreach (var project in reverseFileNames)
             {
                 var projectRelatedFiles = cleanedResourceNames
                     .Where(f => f.Contains(project.Name) && !f.EndsWith(".sln"))
@@ -204,7 +201,6 @@ namespace Moryx.Cli.Template
             foreach (var pair in dictionary.SelectMany(pair => pair.Value))
             {
                 var newFilename = customReplace(pair.Replace(settings.SourceDirectory, settings.TargetDirectory)).Replace(AppPlaceholder, settings.AppName);
-                var path = Path.Combine(settings.TargetDirectory, pair);
 
                 Directory.CreateDirectory(newFilename.Replace(Path.GetFileName(newFilename), ""));
                 File.Copy(pair, newFilename, true);
@@ -223,29 +219,27 @@ namespace Moryx.Cli.Template
         public static string GetSolutionName(string dir, Action<string> onError)
         {
             var files = Directory.GetFiles(dir, "*.sln");
-            if (files != null)
+            switch (files.Length)
             {
-                if (files.Length == 1)
-                {
+                case 1:
                     return Path.GetFileNameWithoutExtension(files[0]);
-                }
-                if (files.Length > 1)
-                {
+                case > 1:
                     onError("Too many `.sln` found. Please make sure, there is only one solution.");
                     return "";
-                }
+                default:
+                    onError("No `.sln` found. Please make sure, there is a VisualStudio solution in this directory.");
+                    return "";
             }
-            onError("No `.sln` found. Please make sure, there is a VisualStudio solution in this directory.");
-            return "";
         }
     }
 
     public class ProjectFileInfo
     {
         public string Name { get; set; }
-        public string Filename { get; set; }
-        public string Extension { get; set; }
 
+        public string Filename { get; set; }
+
+        public string Extension { get; set; }
 
         public override bool Equals(object? obj)
         {
@@ -269,7 +263,7 @@ namespace Moryx.Cli.Template
             return y.Contains(x);
         }
 
-        public int GetHashCode([DisallowNull] string obj)
+        public int GetHashCode(string obj)
         {
             return 0;
         }

@@ -11,15 +11,15 @@ namespace Moryx.Cli.Template
 
             if (!Directory.Exists(targetDir))
             {
-                ExecCommanLine($"git clone {settings.Repository} -b {settings.Branch} --depth 1 --single-branch {targetDir}", _ => { });
+                ExecCommandLine($"git clone {settings.Repository} -b {settings.Branch} --depth 1 --single-branch {targetDir}", _ => { });
             }
             else if(settings.Pull)
             {
-                ExecCommanLine($"git -C {targetDir} pull", _ => { });
+                ExecCommandLine($"git -C {targetDir} pull", _ => { });
             }
         }
 
-        public static int ExecCommanLine(string command, Action<string> onStatus)
+        public static int ExecCommandLine(string command, Action<string> onStatus)
         {
             var process = new Process
             {

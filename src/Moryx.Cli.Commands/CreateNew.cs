@@ -2,14 +2,13 @@
 using Moryx.Cli.Template.Extensions;
 using Moryx.Cli.Template;
 using Moryx.Cli.Template.Models;
-using System.Diagnostics.CodeAnalysis;
 using Moryx.Cli.Commands.Extensions;
 
 namespace Moryx.Cli.Commands
 {
     public static class CreateNew
     {
-        public static CommandResult Solution(NewOptions options, [NotNull] Action<string> onStatus)
+        public static CommandResult Solution(NewOptions options, Action<string> onStatus)
         {
             var solutionName = options.Name!;
             if (Directory.Exists(solutionName))
@@ -21,7 +20,7 @@ namespace Moryx.Cli.Commands
             var settings = config.AsTemplateSettings(dir, solutionName);
             settings.Pull = options.Pull;
 
-            return CommandBase.Exec(settings, (filenames) =>
+            return CommandBase.Exec(settings, _ =>
             {
                 Directory.CreateDirectory(solutionName);
                 CreateBareSolution(settings);
@@ -74,12 +73,12 @@ namespace Moryx.Cli.Commands
         {
             var initialDirectory = Environment.CurrentDirectory;
             Directory.SetCurrentDirectory(Path.Combine(Environment.CurrentDirectory, solutionName));
-            var result = TemplateRepository.ExecCommanLine("git init", onStatus);
+            var result = TemplateRepository.ExecCommandLine("git init", onStatus);
             if (result == 0)
             {
-                TemplateRepository.ExecCommanLine("git checkout -b main", onStatus);
-                TemplateRepository.ExecCommanLine("git add --all", onStatus);
-                TemplateRepository.ExecCommanLine($"git commit -am \"Initial commit for {solutionName}\"", onStatus);
+                TemplateRepository.ExecCommandLine("git checkout -b main", onStatus);
+                TemplateRepository.ExecCommandLine("git add --all", onStatus);
+                TemplateRepository.ExecCommandLine($"git commit -am \"Initial commit for {solutionName}\"", onStatus);
                 onStatus("Initialized Git repository");
             }
             else

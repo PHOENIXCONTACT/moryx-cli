@@ -9,7 +9,6 @@ namespace Moryx.Cli.CommandLine
     [Description("Executes a command against a running MORYX instance.")]
     internal class Exec : Command<Exec.Settings>
     {
-
         internal class Settings : CommandSettings
         {
             [Description("Command to be executed agains a running MORYX instance")]

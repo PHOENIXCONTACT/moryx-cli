@@ -9,15 +9,12 @@ namespace Moryx.Cli.Commands
     {
         public static CommandResult Exec(TemplateSettings settings, IEnumerable<string> products)
         {
-            return CommandBase.Exec(settings, (filenames) =>
-            {
-                return Add(settings, filenames, products);
-            });
+            return CommandBase.Exec(settings, (fileNames) => Add(settings, fileNames, products));
         }
 
         private static CommandResult Add(TemplateSettings settings, List<string> cleanedResourceNames, IEnumerable<string> products)
         {
-            var projectFilenames = cleanedResourceNames.InitialProjects();
+            var projectFileNames = cleanedResourceNames.InitialProjects();
             var filteredResourceNames = cleanedResourceNames.Product();
 
             var msg = new List<string>();
@@ -25,7 +22,7 @@ namespace Moryx.Cli.Commands
             {
                 try
                 {
-                    var dictionary = Template.Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFilenames);
+                    var dictionary = Template.Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFileNames);
 
                     var files = Template.Template.WriteFilesToDisk(
                         dictionary,
