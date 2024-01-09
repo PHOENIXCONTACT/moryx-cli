@@ -8,7 +8,7 @@ namespace Moryx.Cli.Commands
     {
         public static CommandResult Exec(TemplateSettings settings, string moduleName)
         {
-            return CommandBase.Exec(settings, (filenames) =>
+            return CommandBase.Exec(settings, (fileNames) =>
                 AddThing.Exec(
                 settings,
                 new AddConfig
@@ -18,7 +18,7 @@ namespace Moryx.Cli.Commands
                     Thing = "module",
                     ThingPlaceholder = Template.Template.ModulePlaceholder,
                 },
-                filenames.Module(),
+                fileNames.Module(),
                 s => AddProjectsToSolution(settings, s)
                 ));            
         }
