@@ -29,6 +29,9 @@ namespace Moryx.Cli.CommandLine
                     add.SetDescription("Adds certain subjects to the project. See `moryx add --help` for more details.");
                 })
                     .WithAlias("a");
+                config.AddCommand<ImportDreso>("import")
+                    .WithAlias("i")
+                    .WithExample(new[] { "import", "-s", "Path/To/Steps/File.xlsx" });
                 config.AddCommand<Exec>("exec")
                     .WithExample(new[] { "exec", "<COMMAND>", "--endpoint", "<ENDPOINT>" })
                     .IsHidden();

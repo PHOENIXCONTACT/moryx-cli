@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Moryx.Cli.Commands\Moryx.Cli.Commands.csproj" />
+    <ProjectReference Include="..\Moryx.Cli.ImportFpe\Moryx.Cli.ImportFpe.csproj" />
   </ItemGroup>
 
 
