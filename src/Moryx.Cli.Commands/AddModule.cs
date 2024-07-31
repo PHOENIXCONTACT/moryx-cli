@@ -37,7 +37,7 @@ namespace Moryx.Cli.Commands
                 {
                     var filename = Path.GetFileNameWithoutExtension(file);
                     var relativePath = Path.GetRelativePath(settings.TargetDirectory, file);
-                    var str = $"Project(\"{rootGuid}\") = \"{filename}\", \"{relativePath}\", \"{Guid.NewGuid()}\"\r\nEndProject\r\n";
+                    var str = $"Project(\"{rootGuid}\") = \"{filename}\", \"{relativePath}\", \"{{{Guid.NewGuid()}}}\"\r\nEndProject\r\n";
                     using var fileWriter = File.AppendText(solutionFilename);
                     fileWriter.Write(str);
                 }
@@ -49,7 +49,7 @@ namespace Moryx.Cli.Commands
             var lines = File.ReadAllText(Path.Combine(solutionFilename));
             if (lines.Any())
             {
-                var match = Regex.Match(lines, "Project.+(\\{.+\\}).+StartProject");
+                var match = Regex.Match(lines, @"Project.+(\{.+\}).+App");
                 return match.Groups[1].Value;
             }
             return "";
