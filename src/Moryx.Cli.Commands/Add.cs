@@ -27,6 +27,28 @@ namespace Moryx.Cli.Commands
             return AddThing(options, (settings) => AddModule.Exec(settings, options.Name!));
         }
 
+        public static CommandResult StateMachine(AddStatesOptions options)
+        {
+            var addOptions = new AddOptions
+            {
+                Branch = options.Branch,
+                Name = options.ResourceName,
+                Pull = options.Pull,
+                Template = options.Template,
+            };
+            var states = options.States?
+                .Split(',')
+                .Select(x => x.Trim())
+                .ToList() 
+                ?? new List<string>();
+            var transitions = options.States?
+                .Split(',')
+                .Select(x => x.Trim())
+                .ToList()
+                ?? new List<string>();
+            return AddThing(addOptions, (settings) => AddStates.Exec(settings, options.ResourceName!, states, transitions));
+        }
+
         private static CommandResult AddThing(AddOptions options, Func<TemplateSettings, CommandResult> func)
         {
             var currentDir = Environment.CurrentDirectory;

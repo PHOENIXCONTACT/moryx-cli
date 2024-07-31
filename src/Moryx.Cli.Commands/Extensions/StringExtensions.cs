@@ -1,5 +1,4 @@
-﻿using Moryx.Cli.Commands.Options;
-using Moryx.Cli.Template.Models;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Moryx.Cli.Commands.Extensions
 {
@@ -13,5 +12,8 @@ namespace Moryx.Cli.Commands.Extensions
             }
             return s;
         }
+
+        public static string Capitalize([NotNull] this string s)
+            => s[0].ToString().ToUpper() + s.Substring(1);
     }
 }

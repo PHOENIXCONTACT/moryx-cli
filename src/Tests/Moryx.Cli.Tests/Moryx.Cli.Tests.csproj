@@ -10,6 +10,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="StateBaseTests\TestData\AssemblingResourceStateBase.cs" />
+    <Compile Remove="StateBaseTests\TestData\EmptyResourceStateBase.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="StateBaseTests\TestData\AssemblingResourceStateBase.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="StateBaseTests\TestData\EmptyResourceStateBase.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />

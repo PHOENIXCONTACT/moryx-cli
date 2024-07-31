@@ -1,0 +1,67 @@
+using Moryx.Cli.Template.Extensions;
+using Moryx.Cli.Template.StateBaseTemplate;
+
+namespace Moryx.Cli.Tests.StateBaseTests
+{
+    public class ExistingStateBaseTests
+    {
+        private StateBaseTemplate _sut;
+
+        [SetUp]
+        public void Setup()
+        {
+            _sut = StateBaseTemplate.FromFile("StateBaseTests\\TestData\\AssemblingResourceStateBase.cs".Replace('\\', Path.DirectorySeparatorChar));
+        }
+
+        [Test]
+        public void ShouldFindConstructor()
+        {
+            var ctor = _sut.Constructors.First();
+            Assert.NotNull(ctor);
+            Assert.That(ctor.Line, Is.EqualTo(16));
+        }
+
+        [Test]
+        public void ShouldInitiallyContain_3_StateDefinitions()
+        {
+            Assert.That(_sut.StateDefinitions.Count, Is.EqualTo(3));
+        }
+
+        [TestCase("StateWaitForData", "WaitingForUserInputState", 10, 7, true)]
+        [TestCase("StateRunning", "RunningState", 20, 10)]
+        [TestCase("StateOrderFinished", "OrderFinishedState", 27, 13)]
+        public void ShouldParse_3_StateDefinitions(string name, string type, int value, int line, bool isInitial = false)
+        {
+            var definition = _sut.StateDefinitions.Where(sd => sd.Name.Equals(name)).First();
+            Assert.Multiple(() =>
+            {
+                Assert.That(definition?.IsInitial, Is.EqualTo(isInitial));
+                Assert.That(definition?.Line, Is.EqualTo(line));
+            });
+        }
+
+        [Test]
+        public void StateGetsAddedBeforeConstructor()
+        {
+            var newStateBase = _sut.AddState("ReadyState");
+
+            var expectedContent =
+                "        [StateDefinition(typeof(ReadyState))]" + Environment.NewLine +
+                "        protected const int StateReady = 30;" + Environment.NewLine +
+                Environment.NewLine +
+                "        public AssemblingResourceStateBase(AssemblingResource context, StateMap stateMap) : base(context, stateMap)";
+
+            Assert.That(newStateBase.Content, Contains.Substring(expectedContent));
+        }
+
+
+        [Test]
+        public void AddedStateConstantShouldBeNextTenFromLastState()
+        {
+            var newStateBase = _sut.AddState("ReadyState");
+            var definition = newStateBase.StateDefinitions.Last();
+
+            Assert.That(definition.Value, Is.EqualTo(30));
+        }
+    }
+}

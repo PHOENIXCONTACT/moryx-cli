@@ -169,4 +169,51 @@ namespace Moryx.Cli.CommandLine
                 .ProcessResult();
         }
     }
+
+    [Description("Adds a statemachine to a resource of the MORYX solution.")]
+    internal class AddStates: Command<AddStates.AddStatesSettings>
+    {
+        internal class AddStatesSettings : AddSettings
+        {
+            [Description("Name of the resource the statemachine should be added to")]
+            [CommandArgument(0, "<RESOURCE>")]
+            public string? Resource { get; set; }
+
+            [Description("Comma separated list of states to be added. Defaults to <TO BE DEFINED>")]
+            [CommandOption("--states")]
+            public string? States { get; set; }
+
+            [Description("Comma separated list of state transitions.")]
+            [CommandOption("--transitions")]
+            public string? Transitions { get; set; }
+
+            [Description("A Git repository url that will be used for the project template.")]
+            [CommandOption("-t|--template-url")]
+            public string? Template { get; set; }
+
+            [Description("Branch to use with the template repository.")]
+            [CommandOption("-b|--branch")]
+            public string? Branch { get; set; }
+
+            [Description("Update the template repository.")]
+            [CommandOption("--pull"), DefaultValue(false)]
+            public bool Pull { get; set; }
+        }
+
+        public override int Execute([NotNull] CommandContext context, [NotNull] AddStatesSettings settings)
+        {
+            var options = new AddStatesOptions
+            {
+                ResourceName = settings.Resource,
+                States = settings.States,
+                Transitions = settings.Transitions,
+                Branch = settings.Branch,
+                Template = settings.Template,
+                Pull = settings.Pull
+            };
+
+            return Commands.Add.StateMachine(options)
+                .ProcessResult();
+        }
+    }
 }
