@@ -30,6 +30,18 @@ namespace Moryx.Cli.CommandLine
             [Description("Name of the product to be added")]
             [CommandArgument(0, "<NAME>")]
             public string? Name { get; set; }
+
+            [Description("A Git repository url that will be used for the project template.")]
+            [CommandOption("-t|--template-url")]
+            public string? Template { get; set; }
+
+            [Description("Branch to use with the template repository.")]
+            [CommandOption("-b|--branch")]
+            public string? Branch { get; set; }
+
+            [Description("Update the template repository.")]
+            [CommandOption("--pull"), DefaultValue(false)]
+            public bool Pull { get; set; }
         }
 
         public override int Execute([NotNull] CommandContext context, [NotNull] AddProductSettings settings)
@@ -55,6 +67,18 @@ namespace Moryx.Cli.CommandLine
             [Description("Name of the step to be added")]
             [CommandArgument(0, "<NAME>")]
             public string? Name { get; set; }
+
+            [Description("A Git repository url that will be used for the project template.")]
+            [CommandOption("-t|--template-url")]
+            public string? Template { get; set; }
+
+            [Description("Branch to use with the template repository.")]
+            [CommandOption("-b|--branch")]
+            public string? Branch { get; set; }
+
+            [Description("Update the template repository.")]
+            [CommandOption("--pull"), DefaultValue(false)]
+            public bool Pull { get; set; }
         }
 
         public override int Execute([NotNull] CommandContext context, [NotNull] AddStepSettings settings)
@@ -80,6 +104,18 @@ namespace Moryx.Cli.CommandLine
             [Description("Name of the module to be added")]
             [CommandArgument(0, "<NAME>")]
             public string? Name { get; set; }
+
+            [Description("A Git repository url that will be used for the project template.")]
+            [CommandOption("-t|--template-url")]
+            public string? Template { get; set; }
+
+            [Description("Branch to use with the template repository.")]
+            [CommandOption("-b|--branch")]
+            public string? Branch { get; set; }
+
+            [Description("Update the template repository.")]
+            [CommandOption("--pull"), DefaultValue(false)]
+            public bool Pull { get; set; }
         }
 
         public override int Execute([NotNull] CommandContext context, [NotNull] AddModuleSettings settings)
