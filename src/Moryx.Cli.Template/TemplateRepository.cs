@@ -9,7 +9,7 @@ namespace Moryx.Cli.Template
         {
             var targetDir = settings.SourceDirectory;
 
-            if (!Directory.Exists(targetDir))
+            if (!Directory.Exists(targetDir) || Directory.GetFiles(targetDir).Length == 0)
             {
                 ExecCommanLine($"git clone {settings.Repository} -b {settings.Branch} --depth 1 --single-branch {targetDir}", _ => { });
             }
