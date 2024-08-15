@@ -3,6 +3,7 @@ using Moryx.Cli.Template.Models;
 using Moryx.Cli.Commands.Extensions;
 using Moryx.Cli.Template.StateBaseTemplate;
 using Moryx.Cli.Template.Exceptions;
+using Moryx.Cli.Template.StateTemplate;
 
 namespace Moryx.Cli.Commands
 {
@@ -99,7 +100,49 @@ namespace Moryx.Cli.Commands
 
             stateBaseTemplate.SaveToFile(newStateBaseFileName);
 
+            UpdateResource(
+                settings,
+                resource, 
+                success => msg.Add(success),
+                warning => warnings.Add(warning));
+
             return CommandResult.IsOk(string.Join("\n", msg), string.Join("\n", warnings));
+        }
+
+        private static void UpdateResource(TemplateSettings settings, string resource, Action<string> onSuccess, Action<string> onWarning)
+        {
+            var dir = Path.Combine(settings.TargetDirectory, "src", $"{settings.AppName}.Resources");
+            var files = Directory.GetFiles(
+                dir,
+                $"{resource}.cs",
+                new EnumerationOptions
+                {
+                    ReturnSpecialDirectories = false,
+                    RecurseSubdirectories = true
+                });
+            if(files.Length == 0)
+            {
+                onWarning($"Filename `{resource}.cs` not found. Could not update resource.");
+                return;
+            }
+            if (files.Length > 1)
+            {
+                onWarning($"Filename `{resource}.cs` is ambiguous. Could not update resource.");
+                return;
+            }
+            var filename = files.Single();
+
+            try
+            {
+            var template = StateTemplate.FromFile(filename);
+            template = template.ImplementIStateContext(resource);
+            template.SaveToFile(filename);
+                onSuccess($"Updated `{resource}.cs`");
+            }
+            catch (Exception)
+            {
+                onWarning($"Failed to update `{resource}.cs`");
+            }
         }
 
         private static bool ResourceExists(TemplateSettings settings, string resource)

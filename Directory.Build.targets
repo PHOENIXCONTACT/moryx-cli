@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+	<PropertyGroup>
+		<MicrosoftCodeAnalysisVersion>4.10.0</MicrosoftCodeAnalysisVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Update="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+		<PackageReference Update="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
+		<PackageReference Update="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisVersion)" />
+		<PackageReference Update="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
+	</ItemGroup>
+</Project>
