@@ -48,6 +48,7 @@ namespace Moryx.Cli.Commands
             }
 
             var msg = new List<string>();
+            var warnings = new List<string>();
             var stateBaseTemplate = StateBaseTemplate.FromFile(newStateBaseFileName);
 
             foreach (var state in states)
@@ -83,23 +84,22 @@ namespace Moryx.Cli.Commands
 
                         stateBaseTemplate = stateBaseTemplate.AddState(stateType);
 
-                        msg.Add($"Successfully added {state} state");
-                    } else {
-                        return CommandResult.WithError($"Could not add {state}. `{Path.GetFileName(filename)}` already exists!\n");
+                        msg.Add($"Successfully added {stateType} state");
                     }
-                catch (StateAlreadyExistsException ex)
-                {
-                    return CommandResult.WithError($"Failed to add state `{state}`!\n" + ex.Message);
+                    else
+                    {
+                        warnings.Add($"Could not add {stateType}. `{Path.GetFileName(filename)}` already exists!");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    return CommandResult.WithError($"Failed to add state `{state}`!\n" + ex.Message);
+                    warnings.Add($"Failed to add state `{stateType}`! " + ex.Message);
                 }
             }
 
             stateBaseTemplate.SaveToFile(newStateBaseFileName);
 
-            return CommandResult.IsOk(string.Join("\n", msg));
+            return CommandResult.IsOk(string.Join("\n", msg), string.Join("\n", warnings));
         }
 
         private static bool ResourceExists(TemplateSettings settings, string resource)
