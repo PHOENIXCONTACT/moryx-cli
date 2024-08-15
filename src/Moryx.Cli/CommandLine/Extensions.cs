@@ -7,7 +7,7 @@ namespace Moryx.Cli.CommandLine
     {
         internal static int ProcessResult(this CommandResult result)
             => result
-                .OnSuccess(msg => AnsiConsole.Markup($"[green]{msg}[/]"))
+                .OnSuccess((msg, warning) => AnsiConsole.Markup($"[green]{msg}[/]\n[yellow]{warning}[/]"))
                 .OnError(msg => AnsiConsole.Markup($"[red]Error: [/]{msg}"))
                 .ReturnValue();
     }
