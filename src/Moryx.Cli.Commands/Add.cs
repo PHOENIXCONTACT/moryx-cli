@@ -17,6 +17,11 @@ namespace Moryx.Cli.Commands
             return AddThing(options, (settings) => AddProducts.Exec(settings, options.Name!.ToCleanList()));
         }
 
+        public static CommandResult Resources(AddOptions options)
+        {
+            return AddThing(options, (settings) => AddResources.Exec(settings, options.Name!.ToCleanList()));
+        }
+
         public static CommandResult Module(AddOptions options)
         {
             return AddThing(options, (settings) => AddModule.Exec(settings, options.Name!));

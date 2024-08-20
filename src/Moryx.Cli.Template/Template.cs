@@ -10,6 +10,8 @@ namespace Moryx.Cli.Template
         public const string ProductPlaceholder = "MyProduct";
         public const string ModulePlaceholder = "MyModule";
         public const string StepPlaceholder = "Some";
+        public const string ResourcePlaceholder = "SomeResource";
+        public const string ResourcePlaceholder2 = "MyResource";
 
         public static List<string> GetCleanedResourceNames(TemplateSettings settings)
         {
@@ -33,6 +35,7 @@ namespace Moryx.Cli.Template
                 .WithoutSetupTrigger()
                 .WithoutCellSelector()
                 .WithoutModule()
+                .WithoutResource()
                 ;
 
         public static List<string> WithoutProduct(this List<string> list)
@@ -64,6 +67,12 @@ namespace Moryx.Cli.Template
         {
             return list.Except(list.Module()).ToList();
         }
+
+        public static List<string> WithoutResource(this List<string> list)
+        {
+            return list.Except(list.Resource()).ToList();
+        }
+
 
         public static List<string> Product(this List<string> list)
         {
@@ -119,6 +128,17 @@ namespace Moryx.Cli.Template
             var whitelist = new List<string>(){
                 "MyApplicationRecipe.cs",
             };
+            return list
+                .Intersect(whitelist, new ListComparer())
+                .ToList();
+        }
+
+        public static List<string> Resource(this List<string> list)
+        {
+            var whitelist = list
+                .Where(e => e.Contains("ISomeResource") || e.Contains("MyResource"))
+                .ToList();
+
             return list
                 .Intersect(whitelist, new ListComparer())
                 .ToList();
