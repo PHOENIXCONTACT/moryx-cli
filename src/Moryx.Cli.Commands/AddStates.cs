@@ -46,6 +46,16 @@ namespace Moryx.Cli.Commands
                         { Template.Template.StateBasePlaceholder, $"{resource}StateBase" },
                         { Template.Template.ResourcePlaceholder, resource },
                     });
+
+                if(!states.Any())
+                {
+                    states = 
+                    [ 
+                        "NotReadyToWork",
+                        "ReadyToWork",
+                        "Running",
+                    ];
+                }
             }
 
             var msg = new List<string>();
