@@ -1,0 +1,95 @@
+name: 'Build and Publish'
+
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - dev
+      - future
+      - release/*
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+  pull_request:
+    branches: 
+      - dev
+      - future
+      - release/*
+
+env:
+  dotnet_sdk_version: '8.0.x'
+
+jobs:
+  Variables:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Release variables 
+        id: set-variables
+        run: |
+          if [[ ${{ github.ref_name }} =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
+            echo "MORYX_PACKAGE_TARGET=https://www.myget.org/F/moryx/api/v2/package" >> $GITHUB_OUTPUT
+            echo "MORYX_PACKAGE_TARGET_V3=https://www.myget.org/F/moryx/api/v3/index.json" >> $GITHUB_OUTPUT
+            echo "NPM_PACKAGE_SOURCE=//www.myget.org/F/moryx/npm/" >> $GITHUB_OUTPUT
+          else
+            echo "MORYX_PACKAGE_TARGET=https://www.myget.org/F/moryx-ci/api/v2/package" >> $GITHUB_OUTPUT
+            echo "MORYX_PACKAGE_TARGET_V3=https://www.myget.org/F/moryx-ci/api/v3/index.json" >> $GITHUB_OUTPUT
+            echo "NPM_PACKAGE_SOURCE=//www.myget.org/F/moryx-ci/npm/" >> $GITHUB_OUTPUT
+          fi
+    outputs:
+      dotnet_sdk_version: ${{ env.dotnet_sdk_version }}
+      MORYX_PACKAGE_TARGET: ${{ steps.set-variables.outputs.MORYX_PACKAGE_TARGET }}
+      MORYX_PACKAGE_TARGET_V3: ${{ steps.set-variables.outputs.MORYX_PACKAGE_TARGET_V3 }}
+      NPM_PACKAGE_SOURCE: ${{ steps.set-variables.outputs.NPM_PACKAGE_SOURCE }}
+
+  Tests:
+    needs: [Variables]
+    uses: moryx-industry/tools/.github/workflows/run-tests.yml@v1
+    with:
+      dotnet_sdk_version: ${{ needs.Variables.outputs.dotnet_sdk_version }}
+      npm_package_source: ${{ needs.Variables.outputs.NPM_PACKAGE_SOURCE }}
+    secrets:
+      npm_auth_token: ${{ secrets.MYGET_TOKEN }}
+      myget_auth_token: ${{ secrets.MYGET_TOKEN }}
+      myget_user: ${{ secrets.MYGET_USER }}
+      myget_pass: ${{ secrets.MYGET_PASS }}
+
+
+  Build:
+    needs: [Variables, Tests]
+    uses: moryx-industry/tools/.github/workflows/build.yml@v1
+    with:
+      dotnet_sdk_version: ${{ needs.Variables.outputs.dotnet_sdk_version }}
+      NPM_PACKAGE_SOURCE: ${{ needs.Variables.outputs.NPM_PACKAGE_SOURCE }}
+    secrets:
+      npm_auth_token: ${{ secrets.MYGET_TOKEN }}
+      myget_auth_token: ${{ secrets.MYGET_TOKEN }}
+      myget_user: ${{ secrets.MYGET_USER }}
+      myget_pass: ${{ secrets.MYGET_PASS }}
+
+  Create-Reports:
+    needs: [Build]
+    uses: moryx-industry/tools/.github/workflows/create-test-report.yml@v1
+    if: ${{ github.ref_name == 'dev' ||  github.ref_name == 'future' || (startsWith(github.ref, 'refs/tags/v')) }}
+                
+  Publish-Reports:
+    needs: [Create-Reports]
+    uses: moryx-industry/tools/.github/workflows/publish-test-coverage.yml@v1
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  Publish-Packages:
+    needs: [Variables, Build]
+    uses: moryx-industry/tools/.github/workflows/publish-packages.yml@v1
+    with:
+      dotnet_sdk_version: ${{ needs.Variables.outputs.dotnet_sdk_version }}
+      npm_package_source: ${{ needs.Variables.outputs.NPM_PACKAGE_SOURCE }}
+      nuget_package_target: ${{ needs.Variables.outputs.MORYX_PACKAGE_TARGET }}
+      nuget_package_target_v3: ${{ needs.Variables.outputs.MORYX_PACKAGE_TARGET_V3 }}
+    secrets:
+      npm_auth_token: ${{ secrets.MYGET_TOKEN }}
+      myget_auth_token: ${{ secrets.MYGET_TOKEN }}
+      myget_user: ${{ secrets.MYGET_USER }}
+      myget_pass: ${{ secrets.MYGET_PASS }}
+    if: ${{ github.ref_name == 'dev' ||  github.ref_name == 'future' || (startsWith(github.ref, 'refs/tags/v')) }}
+      
+

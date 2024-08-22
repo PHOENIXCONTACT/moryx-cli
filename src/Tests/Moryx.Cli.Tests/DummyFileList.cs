@@ -3,7 +3,7 @@
     internal class DummyFileList
     {
         internal static List<string> Get()
-            => new()
+            => new List<string>()
             {
                 @"C:\<path>\.gitignore",
                 @"C:\<path>\Directory.Build.props",
@@ -59,7 +59,9 @@
                 @"C:\<path>\src\MyApplication\Activities\SomeStep\SomeActivityResults.cs",
                 @"C:\<path>\src\MyApplication\Activities\SomeStep\SomeParameters.cs",
                 @"C:\<path>\src\MyApplication\Activities\SomeStep\SomeTask.cs",
-            };
+            }
+            .Select(s => s.Replace('\\', Path.DirectorySeparatorChar))
+            .ToList();
     }
 }
 
