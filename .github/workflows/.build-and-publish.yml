@@ -16,7 +16,7 @@ on:
       - release/*
 
 env:
-  dotnet_sdk_version: '8.0.x'
+  dotnet_sdk_version: '8.0.300'
 
 jobs:
   Variables:
@@ -28,7 +28,7 @@ jobs:
           if [[ ${{ github.ref_name }} =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
             echo "MORYX_PACKAGE_TARGET=https://www.myget.org/F/moryx/api/v2/package" >> $GITHUB_OUTPUT
             echo "MORYX_PACKAGE_TARGET_V3=https://www.myget.org/F/moryx/api/v3/index.json" >> $GITHUB_OUTPUT
-            echo "NPM_PACKAGE_SOURCE=//www.myget.org/F/moryx/npm/" >> $GITHUB_OUTPUT
+            echo "NPM_PACKAGE_SOURCE=//www.myget.org/F/moryx-ci/npm/" >> $GITHUB_OUTPUT
           else
             echo "MORYX_PACKAGE_TARGET=https://www.myget.org/F/moryx-ci/api/v2/package" >> $GITHUB_OUTPUT
             echo "MORYX_PACKAGE_TARGET_V3=https://www.myget.org/F/moryx-ci/api/v3/index.json" >> $GITHUB_OUTPUT
@@ -65,8 +65,37 @@ jobs:
       myget_user: ${{ secrets.MYGET_USER }}
       myget_pass: ${{ secrets.MYGET_PASS }}
 
-  Create-Reports:
+  Licensing:
     needs: [Build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ⬇️ Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: artifacts/build/
+     
+      - name: Move artifacts
+        run: mv artifacts/build artifacts/Licensing
+
+      - name: Zip artifacts
+        uses: vimtor/action-zip@v1.1
+        with:
+          files: artifacts/Licensing/
+          dest: licensing.zip 
+
+      - name: 📦 Upload licensing artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: licensing
+          path: licensing.zip
+          retention-days: 1
+          if-no-files-found: error
+
+  Create-Reports:
+    needs: [Licensing]
     uses: moryx-industry/tools/.github/workflows/create-test-report.yml@v1
     if: ${{ github.ref_name == 'dev' ||  github.ref_name == 'future' || (startsWith(github.ref, 'refs/tags/v')) }}
                 
@@ -78,7 +107,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   Publish-Packages:
-    needs: [Variables, Build]
+    needs: [Variables, Licensing]
     uses: moryx-industry/tools/.github/workflows/publish-packages.yml@v1
     with:
       dotnet_sdk_version: ${{ needs.Variables.outputs.dotnet_sdk_version }}
