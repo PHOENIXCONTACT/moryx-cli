@@ -53,49 +53,61 @@ jobs:
       myget_pass: ${{ secrets.MYGET_PASS }}
 
 
-  Build:
+  Build-Publish:
     needs: [Variables, Tests]
-    uses: moryx-industry/tools/.github/workflows/build.yml@v1
-    with:
-      dotnet_sdk_version: ${{ needs.Variables.outputs.dotnet_sdk_version }}
-      NPM_PACKAGE_SOURCE: ${{ needs.Variables.outputs.NPM_PACKAGE_SOURCE }}
-    secrets:
-      npm_auth_token: ${{ secrets.MYGET_TOKEN }}
-      myget_auth_token: ${{ secrets.MYGET_TOKEN }}
-      myget_user: ${{ secrets.MYGET_USER }}
-      myget_pass: ${{ secrets.MYGET_PASS }}
-
-  Licensing:
-    needs: [Build]
     runs-on: ubuntu-latest
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      MORYX_COMMERCIAL_BUILD: true
     steps:
       - uses: actions/checkout@v4
 
-      - name: ⬇️ Download build artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/cache@v4
+        id: cache-nuget
         with:
-          name: build
-          path: artifacts/build/
-     
-      - name: Move artifacts
-        run: mv artifacts/build artifacts/Licensing
-
-      - name: Zip artifacts
-        uses: vimtor/action-zip@v1.1
+          path:  ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+    
+      - name: 🔧 Setup .NET SDK
+        uses: actions/setup-dotnet@v4
         with:
-          files: artifacts/Licensing/
-          dest: licensing.zip 
+          dotnet-version: ${{ needs.Variables.outputs.dotnet_sdk_version }}
 
-      - name: 📦 Upload licensing artifacts
+      - name: ♺ Execute nuget restore
+        run: nuget restore
+        if: steps.cache-nuget.outputs.cache-hit != 'true'
+
+      - name: 🧰 Setup BuildToolkit
+        uses: moryx-industry/setup-buildtoolkit@v1
+
+      - name: 🔨 Execute dotnet build
+        run: |
+          .\set-version.ps1 -RefName ${{ github.ref_name }} -IsTag ${{ github.ref_type == 'tag' && 1 || 0 }} -BuildNumber ${{ github.run_number }} -CommitHash ${{ github.sha }}
+          .\build.ps1 -PackageSource ${{ github.workspace }}/.nuget/packages
+        shell: pwsh
+
+      - name: Copy artifacts
+        run: cp -r artifacts/build artifacts/Licensing
+        if: ${{ github.ref_name == 'dev' ||  github.ref_name == 'future' || (startsWith(github.ref, 'refs/tags/v')) }}
+
+      - name: 📦 Create Packages and 🚚 deliver
+        run: |
+          .\set-version.ps1 -RefName ${{ github.ref_name }} -IsTag ${{ github.ref_type == 'tag' && 1 || 0 }} -BuildNumber ${{ github.run_number }} -CommitHash ${{ github.sha }}
+          .\pack-publish.ps1 -NugetApiKey ${{ secrets.MYGET_TOKEN }} -PackageTarget ${{ needs.Variables.outputs.MORYX_PACKAGE_TARGET }}
+        shell: pwsh
+        if: ${{ github.ref_name == 'dev' ||  github.ref_name == 'future' || (startsWith(github.ref, 'refs/tags/v')) }}
+
+      - name: ⬆️ Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: licensing
-          path: licensing.zip
-          retention-days: 1
-          if-no-files-found: error
+          name: packages
+          path: artifacts/packages/
+        if: ${{ github.ref_name == 'dev' ||  github.ref_name == 'future' || (startsWith(github.ref, 'refs/tags/v')) }}
 
   Create-Reports:
-    needs: [Licensing]
+    needs: [Build-Publish]
     uses: moryx-industry/tools/.github/workflows/create-test-report.yml@v1
     if: ${{ github.ref_name == 'dev' ||  github.ref_name == 'future' || (startsWith(github.ref, 'refs/tags/v')) }}
                 
@@ -104,21 +116,5 @@ jobs:
     uses: moryx-industry/tools/.github/workflows/publish-test-coverage.yml@v1
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-  Publish-Packages:
-    needs: [Variables, Licensing]
-    uses: moryx-industry/tools/.github/workflows/publish-packages.yml@v1
-    with:
-      dotnet_sdk_version: ${{ needs.Variables.outputs.dotnet_sdk_version }}
-      npm_package_source: ${{ needs.Variables.outputs.NPM_PACKAGE_SOURCE }}
-      nuget_package_target: ${{ needs.Variables.outputs.MORYX_PACKAGE_TARGET }}
-      nuget_package_target_v3: ${{ needs.Variables.outputs.MORYX_PACKAGE_TARGET_V3 }}
-    secrets:
-      npm_auth_token: ${{ secrets.MYGET_TOKEN }}
-      myget_auth_token: ${{ secrets.MYGET_TOKEN }}
-      myget_user: ${{ secrets.MYGET_USER }}
-      myget_pass: ${{ secrets.MYGET_PASS }}
-    if: ${{ github.ref_name == 'dev' ||  github.ref_name == 'future' || (startsWith(github.ref, 'refs/tags/v')) }}
-      
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}     
 
