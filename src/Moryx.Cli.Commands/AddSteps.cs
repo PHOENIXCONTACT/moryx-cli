@@ -16,7 +16,7 @@ namespace Moryx.Cli.Commands
                         SolutionName = settings.AppName,
                         ThingName = step,
                         Thing = "step",
-                        ThingPlaceholder = Template.Template.StepPlaceholder,
+                        ThingPlaceholders = [Template.Template.StepPlaceholder],
                     },
                     filenames.Step()
                     ))

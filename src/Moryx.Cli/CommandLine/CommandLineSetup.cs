@@ -17,6 +17,8 @@ namespace Moryx.Cli.CommandLine
                 {
                     add.AddCommand<AddProduct>("product")
                         .WithExample(new[] { "add", "product", "<NAME>" });
+                    add.AddCommand<AddResources>("resource")
+                        .WithExample(new[] { "add", "resource", "<NAME>" });
                     add.AddCommand<AddStep>("step")
                         .WithExample(new[] { "add", "step", "<NAME>" });
                     add.AddCommand<AddModule>("module")

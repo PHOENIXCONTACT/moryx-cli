@@ -45,7 +45,7 @@ namespace Moryx.Cli.Tests
             var list = _resourceNames
                 .WithoutStep();
 
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 10));
+            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 9));
         }        
         
         [Test]
@@ -90,7 +90,7 @@ namespace Moryx.Cli.Tests
             var list = _resourceNames
                 .Step();
 
-            Assert.That(list, Has.Count.EqualTo(10));
+            Assert.That(list, Has.Count.EqualTo(9));
         }
 
         [Test]
@@ -100,6 +100,30 @@ namespace Moryx.Cli.Tests
                 .Module();
 
             Assert.That(list, Has.Count.EqualTo(8));
+        }
+
+        [Test]
+        public void CheckResourceFilesGetRemoved()
+        {
+            var list = _resourceNames
+                .WithoutResource();
+
+            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 3));
+        }
+
+        [Test]
+        public void CheckResourceFilesGetReturned()
+        {
+            var list = _resourceNames
+                .Resource();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(list, Has.Count.EqualTo(3));
+                Assert.That(list.First(s => s.EndsWith("ISomeResource.cs")), Is.Not.Null);
+                Assert.That(list.First(s => s.EndsWith(Path.DirectorySeparatorChar + "MyResource.cs")), Is.Not.Null);
+                Assert.That(list.First(s => s.EndsWith("MyResourceTest.cs")), Is.Not.Null);
+            });
         }
 
         [Test]
@@ -158,7 +182,7 @@ namespace Moryx.Cli.Tests
             var fileStructure = Template.Template.PrepareFileStructure(SolutionName, filteredResourceNames, projects);
 
             var flattened = fileStructure.SelectMany(item => item.Value);
-            Assert.That(flattened.Count, Is.EqualTo(29));
+            Assert.That(flattened.Count, Is.EqualTo(28));
         }
 
         [Test]
@@ -167,7 +191,7 @@ namespace Moryx.Cli.Tests
             var resourceNames = _resourceNames;
             var filteredResourceNames = resourceNames.BareProjectFiles();
 
-            Assert.That(filteredResourceNames, Has.Count.EqualTo(29));
+            Assert.That(filteredResourceNames, Has.Count.EqualTo(28));
         }
     }
 }

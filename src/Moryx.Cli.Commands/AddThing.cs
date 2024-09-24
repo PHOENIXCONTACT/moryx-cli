@@ -1,4 +1,5 @@
-﻿using Moryx.Cli.Template;
+﻿using Moryx.Cli.Commands.Extensions;
+using Moryx.Cli.Template;
 using Moryx.Cli.Template.Models;
 
 namespace Moryx.Cli.Commands
@@ -18,15 +19,16 @@ namespace Moryx.Cli.Commands
                     var files = Template.Template.WriteFilesToDisk(
                         dictionary,
                         settings,
-                        s => s.Replace(config.ThingPlaceholder, config.ThingName).Replace(Template.Template.AppPlaceholder, config.SolutionName));
+                        s => s.Replace(config.ThingPlaceholders, config.ThingName).Replace(Template.Template.AppPlaceholder, config.SolutionName));
+
+                    var replaceHolders = config.ThingPlaceholders
+                        .ToDictionary(s => s, s => config.ThingName);
+                    replaceHolders.Add(Template.Template.AppPlaceholder, config.SolutionName);
 
                     Template.Template.ReplacePlaceHoldersInsideFiles(
                         files,
-                        new Dictionary<string, string>
-                        {
-                            { Template.Template.AppPlaceholder, config.SolutionName},
-                            { config.ThingPlaceholder, config.ThingName },
-                        });
+                        replaceHolders);
+
                     onAddedFiles?.Invoke(files);
                 }
                 catch (Exception ex)
@@ -59,6 +61,6 @@ namespace Moryx.Cli.Commands
         /// <summary>
         /// *Thing*s placeholder
         /// </summary>
-        public string ThingPlaceholder { get; set; }
+        public IEnumerable<string> ThingPlaceholders { get; set; }
     }
 }

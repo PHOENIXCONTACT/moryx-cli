@@ -96,4 +96,41 @@ namespace Moryx.Cli.CommandLine
                 .ProcessResult();
         }
     }
+
+    [Description("Adds resources to your MORYX solution.")]
+    internal class AddResources : Command<AddResources.AddResourcesSettings>
+    {
+        internal class AddResourcesSettings : AddSettings
+        {
+            [Description("Name of the module to be added")]
+            [CommandArgument(0, "<NAME>")]
+            public string? Name { get; set; }
+
+            [Description("A Git repository url that will be used for the project template.")]
+            [CommandOption("-t|--template-url")]
+            public string? Template { get; set; }
+
+            [Description("Branch to use with the template repository.")]
+            [CommandOption("-b|--branch")]
+            public string? Branch { get; set; }
+
+            [Description("Update the template repository.")]
+            [CommandOption("--pull"), DefaultValue(false)]
+            public bool Pull { get; set; }
+        }
+
+        public override int Execute([NotNull] CommandContext context, [NotNull] AddResourcesSettings settings)
+        {
+            var options = new AddOptions
+            {
+                Name = settings.Name,
+                Branch = settings.Branch,
+                Template = settings.Template,
+                Pull = settings.Pull
+            };
+
+            return Commands.Add.Resources(options)
+                .ProcessResult();
+        }
+    }
 }
