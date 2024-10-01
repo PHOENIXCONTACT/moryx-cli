@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Moryx.Cli.Commands\Moryx.Cli.Commands.csproj" />
     <ProjectReference Include="..\..\Moryx.Cli.Template\Moryx.Cli.Template.csproj" />
   </ItemGroup>
 
