@@ -46,21 +46,21 @@ namespace Moryx.Cli.Commands
         /// <summary>
         /// Name of the solution file (<SolutionName>.sln)
         /// </summary>
-        public string SolutionName { get; set; }
+        public required string SolutionName { get; set; }
 
         /// <summary>
         /// Type of this thing, like `module`. Used for displaying user outputs
         /// </summary>
-        public string Thing { get; set; }
+        public required string Thing { get; set; }
 
         /// <summary>
         /// Actual name identifiere of the *thing* to be added
         /// </summary>
-        public string ThingName { get; set; }
+        public required string ThingName { get; set; }
 
         /// <summary>
         /// *Thing*s placeholder
         /// </summary>
-        public IEnumerable<string> ThingPlaceholders { get; set; }
+        public required IEnumerable<string> ThingPlaceholders { get; set; }
     }
 }

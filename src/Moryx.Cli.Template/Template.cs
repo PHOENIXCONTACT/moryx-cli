@@ -277,9 +277,9 @@ namespace Moryx.Cli.Template
 
     public class ProjectFileInfo
     {
-        public string Name { get; set; }
-        public string Filename { get; set; }
-        public string Extension { get; set; }
+        public required string Name { get; set; }
+        public required string Filename { get; set; }
+        public required string Extension { get; set; }
 
 
         public override bool Equals(object? obj)
@@ -301,6 +301,8 @@ namespace Moryx.Cli.Template
 
         public bool Equals(string? x, string? y)
         {
+            if (x == null || y == null) 
+                return false;
             return y.Contains(x);
         }
 

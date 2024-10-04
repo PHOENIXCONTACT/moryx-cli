@@ -20,8 +20,8 @@ namespace Moryx.Cli.Commands.Extensions
         public static Config.Models.Configuration ToConfiguration(this NewOptions options, string profile = "default")
         {
             var result = Config.Models.Configuration.DefaultConfiguration();
-            result.Profiles[profile].Repository = options.Template;
-            result.Profiles[profile].Branch = options.Branch;
+            result.Profiles[profile].Repository = options.Template ?? DefaultValues.DefaultTemplate;
+            result.Profiles[profile].Branch = options.Branch ?? DefaultValues.DefaultBranch;
             return result;
         }
     }

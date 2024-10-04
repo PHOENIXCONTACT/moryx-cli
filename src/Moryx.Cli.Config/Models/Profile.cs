@@ -2,7 +2,7 @@
 {
     public class Profile
     {
-        public string Branch { get;set; }
-        public string Repository { get; set; }    
+        public required string Branch { get;set; }
+        public required string Repository { get; set; }    
     }
 }

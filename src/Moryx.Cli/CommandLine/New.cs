@@ -30,11 +30,11 @@ namespace Moryx.Cli.CommandLine
             public bool NoGitInit { get; set; }
 
             [Description("A Git repository url that will be used for the project template.")]
-            [CommandOption("-t|--template-url"), DefaultValue("https://github.com/PHOENIXCONTACT/MORYX-Template.git")]
+            [CommandOption("-t|--template-url"), DefaultValue(DefaultValues.DefaultTemplate)]
             public string? Template { get; set; }
 
             [Description("Branch to use with the template repository.")]
-            [CommandOption("-b|--branch"), DefaultValue("machine")]
+            [CommandOption("-b|--branch"), DefaultValue(DefaultValues.DefaultBranch)]
             public string? Branch { get; set; }
 
             [Description("Update the template repository.")]
