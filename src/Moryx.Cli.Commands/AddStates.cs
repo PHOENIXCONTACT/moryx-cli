@@ -51,9 +51,11 @@ namespace Moryx.Cli.Commands
                 {
                     states = 
                     [ 
-                        "NotReadyToWork",
+                        "Idle",
                         "ReadyToWork",
                         "Running",
+                        "ProcessAborting",
+                        "SessionComplete",
                     ];
                 }
             }
