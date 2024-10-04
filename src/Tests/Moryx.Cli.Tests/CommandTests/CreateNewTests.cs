@@ -20,7 +20,7 @@ namespace Moryx.Cli.Tests.CommandTests
 
             Assert.Multiple(() =>
             {
-                filteredNames.Each((s, i) =>
+                filteredNames.ForEach(s =>
                 {
                     Assert.That(s, Does.Not.Contain("MyResource"));
                     Assert.That(s, Does.Not.Contain("State.cs"));

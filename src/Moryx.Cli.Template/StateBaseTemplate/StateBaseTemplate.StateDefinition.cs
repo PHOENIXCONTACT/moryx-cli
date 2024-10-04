@@ -1,4 +1,6 @@
-﻿namespace Moryx.Cli.Template.StateBaseTemplate
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace Moryx.Cli.Template.StateBaseTemplate
 {
     public partial class StateBaseTemplate
     {
@@ -7,29 +9,27 @@
             /// <summary>
             /// Name of the state definition. E.g.: `StateReady`
             /// </summary>
-            public string Name { get; init; }
+            public required string Name { get; init; }
 
             /// <summary>
             /// Type of the state. E.g.: `ReadyState`
             /// </summary>
-            public string Type { get; init; }
+            public required string Type { get; init; }
 
             /// <summary>
             /// Integer value of the state, usually incremented in 10th
             /// </summary>
-            public int Value { get; init; }
+            public required int Value { get; init; }
 
             /// <summary>
             /// Whether it is the initial state of the state machine
             /// </summary>
-            public bool IsInitial { get; init; }
+            public required bool IsInitial { get; init; }
 
             /// <summary>
-            /// Position, where the definition was found inside the `*StateBase.cs`
+            /// Syntax node
             /// </summary>
-            public int Line { get; init; }
-
-
+            public required FieldDeclarationSyntax Node { get; init; }
         }
     }
 }

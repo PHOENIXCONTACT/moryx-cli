@@ -2,13 +2,14 @@
 {
     public static class ListExtensions
     {
-        public static void Each<T>(this IEnumerable<T> e, Action<T, int> action)
+        public static List<string> Intersect(this List<string> list, string filename)
         {
-            var i = 0;
-            foreach (var item in e)
-            {
-                action(item, i++);
-            }
+            var whitelist = new List<string>(){
+                filename
+            };
+            return list
+                .Intersect(whitelist, new ListComparer())
+                .ToList();
         }
     }
 }

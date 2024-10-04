@@ -1,4 +1,5 @@
-﻿using Moryx.Cli.Template.Models;
+﻿using Moryx.Cli.Template.Extensions;
+using Moryx.Cli.Template.Models;
 using System.Diagnostics.CodeAnalysis;
 
 
@@ -87,16 +88,6 @@ namespace Moryx.Cli.Template
             var whitelist = new List<string>(){
                 "MyProductInstance.cs",
                 "MyProductType.cs"
-            };
-            return list
-                .Intersect(whitelist, new ListComparer())
-                .ToList();
-        }
-
-        public static List<string> Intersect(this List<string> list, string filename)
-        {
-            var whitelist = new List<string>(){
-                filename
             };
             return list
                 .Intersect(whitelist, new ListComparer())

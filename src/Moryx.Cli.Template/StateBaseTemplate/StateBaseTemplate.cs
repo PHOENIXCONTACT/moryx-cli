@@ -1,21 +1,29 @@
-﻿using Moryx.Cli.Template.Exceptions;
-using Moryx.Cli.Template.Extensions;
-using System.Text.RegularExpressions;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Formatting;
+using Moryx.Cli.Template.Exceptions;
 
 namespace Moryx.Cli.Template.StateBaseTemplate
 {
     public partial class StateBaseTemplate
     {
+        private const string StateDefinitionAttributeName = "StateDefinition";
+        private const string IsInitialParameterName = "IsInitial";
         private readonly string _content;
+        private readonly SyntaxTree _syntaxTree;
 
         public StateBaseTemplate(string content)
         {
             _content = content;
-            Parse(content);
+            _syntaxTree = CSharpSyntaxTree.ParseText(_content);
+
+                 Parse(_syntaxTree);
+
         }
 
-        public IEnumerable<Constructor> Constructors { get; private set; } = new List<Constructor>();
-        public IEnumerable<StateDefinition> StateDefinitions { get; private set; } = new List<StateDefinition>();
+        public IEnumerable<ConstructorDeclarationSyntax> Constructors { get; private set; } = [];
+        public IEnumerable<StateDefinition> StateDeclarations { get; private set; } = [];
         public string Content { get => _content;  }
 
         public static StateBaseTemplate FromFile(string fileName)
@@ -24,85 +32,137 @@ namespace Moryx.Cli.Template.StateBaseTemplate
             return new StateBaseTemplate(content);
         }
 
-        private void Parse(string content)
+        private void Parse(SyntaxTree syntaxTree)
         {
-            var ctors = new List<Constructor>();
-            var states = new Dictionary<int, string>();
+            var root = syntaxTree.GetRoot();
 
-            content.Split(Environment.NewLine).Each((line, i) =>
-            {
-
-                if (Regex.Match(line, @"public\s+\w+\(").Success)
-                {
-                    ctors.Add(new Constructor { Line = i + 1 });
-                } 
-                else {
-                    var match = Regex.Match(line, @"\[\s*StateDefinition\s*\(\s*typeof\s*\(\s*(\w+)");
-                    if (match.Success)
-                    {
-                        states.Add(i, match.Groups[1].Value);
-                    }
-                }
-            });
-
-
-            StateDefinitions = ExtractStateDefinitions(states, content);
-            Constructors = ctors;
+            StateDeclarations = ExtractStateDefinitions(root);
+            Constructors = ExtractConstructors(root);
         }
 
-        private IEnumerable<StateDefinition> ExtractStateDefinitions(Dictionary<int, string> states, string content)
+        private IEnumerable<ConstructorDeclarationSyntax> ExtractConstructors(SyntaxNode root)
         {
+            return root.DescendantNodes().OfType<ConstructorDeclarationSyntax>().ToList();
+        }
+
+        private IEnumerable<StateDefinition> ExtractStateDefinitions(SyntaxNode root)
+        { 
             var result = new List<StateDefinition>();
-            var minifiedContent = content.Replace(Environment.NewLine, "");
+            var states = root
+                .DescendantNodes()
+                .OfType<FieldDeclarationSyntax>()
+                .Where(p => p.AttributeLists.Any(a => a.Attributes.Any(attr => attr.Name.ToString() == StateDefinitionAttributeName)));
 
             foreach (var state in states)
             {
-                var start = minifiedContent.IndexOf($"[StateDefinition(typeof({state.Value}");
-                var end = minifiedContent.IndexOf(";", start);
-                var s = minifiedContent.Substring(start, end - start +1);
-                var match = Regex.Match(s, @"(\w+)\s*=\s*(\d+)\s*");
-                if (match.Success) {
-                    result.Add(new StateDefinition
-                    {
-                        Name = match.Groups[1].Value,
-                        Type = state.Value,
-                        Value = Convert.ToInt32(match.Groups[2].Value),
-                        IsInitial = Regex.Match(s, @"IsInitial\s*=\s*true").Success,
-                        Line = state.Key + 1,
-                    });
-                }
+                var attributeArguments = GetAttributeArguments(state, StateDefinitionAttributeName);
+                var variable = state.Declaration.Variables.First();
+                result.Add(new StateDefinition
+                {
+                    Name = variable.Identifier.Text,
+                    Type = attributeArguments.First(a => a.Key == "").Value,
+                    Value = Convert.ToInt32(variable.Initializer?.Value.ToString()),
+                    IsInitial = attributeArguments.Any(a => a.Key == IsInitialParameterName && a.Value.ToString() == "true"),
+                    Node = state,
+                });
+                
             }
+
             return result;
+        }
+
+        public List<KeyValuePair<string, string>> GetAttributeArguments(FieldDeclarationSyntax field, string attributeName)
+        {
+            var semanticModel = CSharpCompilation.Create("SemanticModelCompilation", [_syntaxTree]).GetSemanticModel(_syntaxTree);
+            
+            return field.AttributeLists.Select(
+                list => list.Attributes
+                    .Where(attribute => attribute.Name.ToString() == attributeName)
+                    .Select(attribute =>
+                        attribute.ArgumentList?.Arguments.Select(a =>
+                            new KeyValuePair<string, string>(
+                            a.NameEquals?.Name.Identifier.ValueText ?? "",
+                            (a.Expression).ToString())
+                            )
+                        .ToList())
+                    .FirstOrDefault()
+             ).FirstOrDefault() ?? [];
         }
 
         public StateBaseTemplate AddState(string stateType)
         {
-            if(StateDefinitions.Any(sd => sd.Type == stateType))
+            if(StateDeclarations.Any(sd => sd.Type == $"typeof({stateType})"))
             {
                 throw new StateAlreadyExistsException(stateType);
             }
+            int value = NextConst(StateDeclarations);
 
-            var lines = _content.Split(Environment.NewLine);
-            var newLines = new List<string>();
-            var ctorIndex = Constructors.First().Line - 1;
-            newLines.AddRange(lines.Take(ctorIndex));
-            var initial = StateDefinitions.Any(sd => sd.IsInitial)
-                ? ""
-                : ", IsInitial = true";
-            int value = NextConst(StateDefinitions);
+            var parameters = new List<AttributeArgumentSyntax>
+            {
+                SyntaxFactory.AttributeArgument(
+                    SyntaxFactory.TypeOfExpression(SyntaxFactory.ParseTypeName(stateType)))
+            };
 
-            newLines.Add($"        [StateDefinition(typeof({stateType}){initial})]");
-            newLines.Add($"        protected const int {TypeToConst(stateType)} = {value};");
-            newLines.Add("");
+            if(!StateDeclarations.Any(sd => sd.IsInitial))
+            {
+                parameters.Add(SyntaxFactory.AttributeArgument(
+                    SyntaxFactory.NameEquals(IsInitialParameterName),
+                    null,
+                    SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression)));
 
-            newLines.AddRange(lines.TakeLast(lines.Count() - ctorIndex));
+            }
 
-            return new StateBaseTemplate(string.Join(Environment.NewLine, newLines));
+            var attribute = SyntaxFactory.Attribute(SyntaxFactory.ParseName(StateDefinitionAttributeName))
+                .WithArgumentList(SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(parameters)));
+            
+            var attributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute));
+
+            var stateDeclaration = SyntaxFactory
+                .FieldDeclaration(SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName("int"))
+                .AddVariables(SyntaxFactory
+                    .VariableDeclarator(TypeToConst(stateType))
+                    .WithInitializer(SyntaxFactory.EqualsValueClause(
+                        SyntaxFactory.LiteralExpression(
+                            SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(value))))))
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.ProtectedKeyword))
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.ConstKeyword))
+                .AddAttributeLists(attributeList);
+       
+            var updatedRoot = InsertStateDeclaration(stateDeclaration);
+            updatedRoot = Formatter.Format(updatedRoot, new AdhocWorkspace());
+            return new StateBaseTemplate(updatedRoot.ToFullString());
+        }
+
+        private SyntaxNode InsertStateDeclaration(FieldDeclarationSyntax fieldDeclaration)
+        {
+            var root = _syntaxTree.GetRoot();
+            var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault();
+            SyntaxNode? updatedClassDeclaration = null;
+
+            if (classDeclaration != null)
+            {
+                var constructor = Constructors.FirstOrDefault();
+                if (constructor != null)
+                {
+                    var members = classDeclaration.Members.Insert(classDeclaration.Members.IndexOf(constructor), fieldDeclaration);
+                    updatedClassDeclaration = classDeclaration.WithMembers(members);
+                }
+                else
+                {
+                    updatedClassDeclaration = classDeclaration.AddMembers(fieldDeclaration);
+                }
+
+                if (updatedClassDeclaration != null)
+                {
+                    return root.ReplaceNode(classDeclaration, updatedClassDeclaration);
+                }
+            }
+            return root;
         }
 
         private int NextConst(IEnumerable<StateDefinition> stateDefinitions)
         {
-            var result = StateDefinitions
+            var result = StateDeclarations
                 .OrderByDescending(sd => sd.Value)
                 .FirstOrDefault()?
                 .Value ?? 0;

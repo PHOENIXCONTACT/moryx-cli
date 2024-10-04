@@ -50,10 +50,10 @@ namespace Moryx.Cli.Template.StateTemplate
                 root = CSharpSyntaxTree.ParseText(root.ToFullString()).GetRoot();
 
                 var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(" Moryx.StateMachines"));
-                if (!(root as CompilationUnitSyntax).Usings.Any(u => u.Name.ToString() == usingDirective.Name.ToString()))
+                if (!((CompilationUnitSyntax)root).Usings.Any(u => u.Name?.ToString() == usingDirective.Name?.ToString()))
                 {
-                    root = (root as CompilationUnitSyntax).AddUsings(usingDirective);
-                    root = (root as CompilationUnitSyntax).WithUsings(SyntaxFactory.List((root as CompilationUnitSyntax).Usings.OrderBy(u => u.Name?.ToString())));
+                    root = ((CompilationUnitSyntax)root).AddUsings(usingDirective);
+                    root = ((CompilationUnitSyntax)root).WithUsings(SyntaxFactory.List(((CompilationUnitSyntax)root).Usings.OrderBy(u => u.Name?.ToString())));
                     root = CSharpSyntaxTree.ParseText(root.ToFullString()).GetRoot();
                 }
 
