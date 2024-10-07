@@ -4,7 +4,7 @@ namespace Moryx.Cli.Tests
 {
     public class TemplateTests
     {
-        private const int NumberOfResources = 54;
+        private const int NumberOfResources = 56;
         private const string SolutionName = "UnitTestSolution";
         private List<string> _resourceNames;
 
@@ -192,6 +192,26 @@ namespace Moryx.Cli.Tests
             var filteredResourceNames = resourceNames.BareProjectFiles();
 
             Assert.That(filteredResourceNames, Has.Count.EqualTo(28));
+        }
+
+        [Test]
+        public void CheckStateFileGetsReturned()
+        {
+            var list = _resourceNames
+                .StateFile();
+
+            Assert.That(list, Has.Count.EqualTo(1));
+            Assert.That(list[0].EndsWith("SpecificState.cs"));
+        }
+
+        [Test]
+        public void CheckStateBaseFileGetsReturned()
+        {
+            var list = _resourceNames
+                .StateBaseFile();
+
+            Assert.That(list, Has.Count.EqualTo(1));
+            Assert.That(list[0].EndsWith("StateBase.cs"));
         }
     }
 }

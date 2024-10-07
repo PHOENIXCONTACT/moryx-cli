@@ -26,6 +26,8 @@
                 @"C:\<path>\src\MyApplication.Products\MyApplication.Products.csproj",
                 @"C:\<path>\src\MyApplication.Resources\MyApplication.Resources.csproj",
                 @"C:\<path>\src\MyApplication.Resources\MyResource.cs",
+                @"C:\<path>\src\MyApplication.Resources\StateBase.cs",
+                @"C:\<path>\src\MyApplication.Resources\SpecificState.cs",
                 @"C:\<path>\src\MyApplication.Resources\SimulatedInOutDriver.cs",
                 @"C:\<path>\src\MyApplication.Resources\SomeCell.cs",
                 @"C:\<path>\src\MyApplication\Capabilities\SomeCapabilities.cs",

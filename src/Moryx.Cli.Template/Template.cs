@@ -1,4 +1,5 @@
-﻿using Moryx.Cli.Template.Models;
+﻿using Moryx.Cli.Template.Extensions;
+using Moryx.Cli.Template.Models;
 using System.Diagnostics.CodeAnalysis;
 
 
@@ -9,7 +10,9 @@ namespace Moryx.Cli.Template
         public const string AppPlaceholder = "MyApplication";
         public const string ProductPlaceholder = "MyProduct";
         public const string ModulePlaceholder = "MyModule";
-        public const string StepPlaceholder = "Some";
+        public const string StepPlaceholder = "SomeCell";
+        public const string StateBasePlaceholder = "SomeStateBase";
+        public const string StatePlaceholder = "SpecificState";
         public const string ResourcePlaceholder = "SomeResource";
         public const string ResourcePlaceholder2 = "MyResource";
 
@@ -36,6 +39,7 @@ namespace Moryx.Cli.Template
                 .WithoutCellSelector()
                 .WithoutModule()
                 .WithoutResource()
+                .WithoutState()
                 ;
 
         public static List<string> WithoutProduct(this List<string> list)
@@ -67,6 +71,11 @@ namespace Moryx.Cli.Template
         {
             return list.Except(list.Module()).ToList();
         }
+        
+        public static List<string> WithoutState(this List<string> list)
+        {
+            return list.Except(list.StateFile().Concat(list.StateBaseFile())).ToList();
+        }
 
         public static List<string> WithoutResource(this List<string> list)
         {
@@ -84,6 +93,12 @@ namespace Moryx.Cli.Template
                 .Intersect(whitelist, new ListComparer())
                 .ToList();
         }
+
+        public static List<string> StateBaseFile(this List<string> list)
+            => list.Intersect("StateBase.cs");
+
+        public static List<string> StateFile(this List<string> list)
+            => list.Intersect("State.cs");
 
         public static List<string> Step(this List<string> list)
         {
@@ -226,7 +241,7 @@ namespace Moryx.Cli.Template
                 var newFilename = customReplace(pair.Replace(settings.SourceDirectory, settings.TargetDirectory)).Replace(AppPlaceholder, settings.AppName);
                 var path = Path.Combine(settings.TargetDirectory, pair);
 
-                Directory.CreateDirectory(newFilename.Replace(Path.GetFileName(newFilename), ""));
+                Directory.CreateDirectory(Path.GetDirectoryName(newFilename) ?? "");
                 File.Copy(pair, newFilename, true);
                 result.Add(newFilename);
             }
@@ -238,7 +253,7 @@ namespace Moryx.Cli.Template
             => str.Replace(ProductPlaceholder, productName);
 
         public static string ReplaceStepName(this string str, string stepName)
-            => str.Replace(StepPlaceholder, stepName);
+            => str.Replace(ResourcePlaceholder, stepName);
 
         public static string GetSolutionName(string dir, Action<string> onError)
         {
@@ -262,9 +277,9 @@ namespace Moryx.Cli.Template
 
     public class ProjectFileInfo
     {
-        public string Name { get; set; }
-        public string Filename { get; set; }
-        public string Extension { get; set; }
+        public required string Name { get; set; }
+        public required string Filename { get; set; }
+        public required string Extension { get; set; }
 
 
         public override bool Equals(object? obj)
@@ -286,6 +301,8 @@ namespace Moryx.Cli.Template
 
         public bool Equals(string? x, string? y)
         {
+            if (x == null || y == null) 
+                return false;
             return y.Contains(x);
         }
 

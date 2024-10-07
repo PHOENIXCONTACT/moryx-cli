@@ -5,15 +5,14 @@ namespace Moryx.Cli.Config.Models
 {
     public class Configuration
     {
-        public Dictionary<string, Profile> Profiles { get; set; }
+        public required Dictionary<string, Profile> Profiles { get; set; }
 
         public static Configuration Load(string directory) {
             try
             {
                 using var file = File.OpenText(GetFilename(directory));
                 var serializer = new JsonSerializer();
-                return (Configuration)serializer.Deserialize(file, typeof(Configuration))
-                    ?? DefaultConfiguration();
+                return serializer.Deserialize(file, typeof(Configuration)) as Configuration ?? DefaultConfiguration();
             } catch (Exception)
             {
                 return DefaultConfiguration();

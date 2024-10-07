@@ -50,14 +50,7 @@ namespace Moryx.Cli.Commands
         {
             var cleanedResourceNames = Template.Template.GetCleanedResourceNames(settings);
             var projectFilenames = cleanedResourceNames.InitialProjects();
-            var filteredResourceNames = cleanedResourceNames
-                .WithoutStep()
-                .WithoutProduct()
-                .WithoutRecipe()
-                .WithoutSetupTrigger()
-                .WithoutCellSelector()
-                .WithoutModule()
-                ;
+            var filteredResourceNames = FilteredResourceNames(cleanedResourceNames);
 
             var dictionary = Template.Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFilenames);
 
@@ -68,6 +61,20 @@ namespace Moryx.Cli.Commands
                 {
                     { Template.Template.AppPlaceholder, settings.AppName }
                 });
+        }
+
+        public static List<string> FilteredResourceNames(List<string> resourceNames)
+        {
+            return resourceNames
+                .WithoutStep()
+                .WithoutProduct()
+                .WithoutRecipe()
+                .WithoutSetupTrigger()
+                .WithoutCellSelector()
+                .WithoutModule()
+                .WithoutResource()
+                .WithoutState()
+                ;
         }
 
         private static void InitializeGitRepo(string solutionName, Action<string> onStatus)

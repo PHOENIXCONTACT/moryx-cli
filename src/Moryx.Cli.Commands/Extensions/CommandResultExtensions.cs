@@ -7,7 +7,7 @@
             {
                 return CommandResult.WithError(string.Join("\n", results.Select(r => r.Error)));
             }
-            return CommandResult.IsOk(string.Join("\n", results.Select(r => r.Success)));
+            return CommandResult.IsOk(string.Join("\n", results.Select(r => r.Success)), string.Join("\n", results.Select(r => r.Warning)));
         }
     }
 }

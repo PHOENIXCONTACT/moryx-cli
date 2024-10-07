@@ -8,7 +8,7 @@ namespace Moryx.Cli.CommandLine
         {
             app.Configure(config =>
             {
-                //config.AddDebugConfigIfDebug();
+                config.AddDebugConfigIfDebug();
 
                 config.AddCommand<New>("new")
                     .WithAlias("n")
@@ -27,6 +27,10 @@ namespace Moryx.Cli.CommandLine
                         ;
                     add.AddCommand<AddModule>("adapter")
                         .WithExample(new[] { "add", "adapter", "<NAME>" })
+                        ;
+                    add.AddCommand<AddStates>("states")
+                        .WithExample(new[] { "add", "states", "<RESOURCE>" })
+                        .WithExample(new[] { "add", "states", "<RESOURCE>", "--states", "\"Idle, Running, Failure\"" })
                         ;
                     add.SetDescription("Adds certain subjects to the project. See `moryx add --help` for more details.");
                 })
