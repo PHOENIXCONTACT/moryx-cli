@@ -90,7 +90,7 @@ namespace Moryx.Cli.Commands
         => new()
         {
             JsonColumn = "Text8",
-            TargetType = $"Moryx.{solutionName}.Products.{product}Type",
+            TargetType = $"{solutionName}.Products.{product}Type",
             PropertyConfigs = new List<PropertyMapperConfig>(),
             PluginName = "GenericTypeStrategy",
         };
@@ -98,7 +98,7 @@ namespace Moryx.Cli.Commands
         private static ProductInstanceConfiguration BuildProductInstanceConfiguration(string solutionName, string product)
         => new()
         {
-            TargetType = $"Moryx.{solutionName}.Products.{product}Instance",
+            TargetType = $"{solutionName}.Products.{product}Instance",
             PluginName = "SkipInstancesStrategy",
         };
     }
