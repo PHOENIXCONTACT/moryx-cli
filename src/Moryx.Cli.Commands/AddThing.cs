@@ -1,4 +1,6 @@
-﻿using Moryx.Cli.Commands.Extensions;
+﻿using Castle.Components.DictionaryAdapter;
+using Microsoft.CodeAnalysis.FlowAnalysis;
+using Moryx.Cli.Commands.Extensions;
 using Moryx.Cli.Template;
 using Moryx.Cli.Template.Models;
 
@@ -6,7 +8,16 @@ namespace Moryx.Cli.Commands
 {
     public static class AddThing
     {
-        public static CommandResult Exec(TemplateSettings settings, AddConfig config, List<string> resourceNames, Action<IEnumerable<string>>? onAddedFiles = null)
+        /// <summary>
+        /// Retrieves files of a certain category from the template and moves them as defined 
+        /// in <paramref name="filenames"/> to the current project.
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="config"></param>
+        /// <param name="resourceNames"></param>
+        /// <param name="onAddedFiles"></param>
+        /// <returns></returns>
+        public static CommandResult Exec(TemplateSettings settings, AddConfig config, List<string> resourceNames, Action<IEnumerable<string>>? onAddedFiles = null, StringReplacements? replacements = null)
         {
             return CommandBase.Exec(settings, (filenames) =>
             {
@@ -14,20 +25,21 @@ namespace Moryx.Cli.Commands
 
                 try
                 {
+                    if(replacements == null)
+                    {
+                        replacements = new StringReplacements(config);
+                    }
                     var dictionary = Template.Template.PrepareFileStructure(config.SolutionName, resourceNames, projectFilenames);
 
                     var files = Template.Template.WriteFilesToDisk(
                         dictionary,
                         settings,
-                        s => s.Replace(config.ThingPlaceholders, config.ThingName).Replace(Template.Template.AppPlaceholder, config.SolutionName));
-
-                    var replaceHolders = config.ThingPlaceholders
-                        .ToDictionary(s => s, s => config.ThingName);
-                    replaceHolders.Add(Template.Template.AppPlaceholder, config.SolutionName);
+                        s => s.Replace(replacements.FileNamePatterns)
+                    );
 
                     Template.Template.ReplacePlaceHoldersInsideFiles(
                         files,
-                        replaceHolders);
+                        replacements.FileContentPatterns);
 
                     onAddedFiles?.Invoke(files);
                 }
@@ -62,5 +74,51 @@ namespace Moryx.Cli.Commands
         /// *Thing*s placeholder
         /// </summary>
         public required IEnumerable<string> ThingPlaceholders { get; set; }
+    }
+
+    public class StringReplacements
+    {
+        public Dictionary<string, string> FileNamePatterns { get; }
+        public Dictionary<string, string> FileContentPatterns { get; }w
+
+        public StringReplacements(AddConfig config)
+        {
+            FileNamePatterns = CreateDictionary(config);
+            FileContentPatterns = CreateDictionary(config);
+        }
+
+        public Dictionary<string, string> CreateDictionary(AddConfig config)
+        {
+            var result = config.ThingPlaceholders
+                .ToDictionary(s => s, s => config.ThingName);
+
+            result.TryAdd(Template.Template.AppPlaceholder, config.SolutionName);
+            return result;
+        }
+
+
+        public StringReplacements AddFileNamePatterns(Dictionary<string, string> patterns)
+        {
+            foreach (var pattern in patterns)
+            {
+                if (!FileNamePatterns.ContainsKey(pattern.Key))
+                {
+                    FileNamePatterns.Add(pattern.Key, pattern.Value);
+                }
+            }
+            return this;
+        }
+
+        public StringReplacements AddContentPatterns(Dictionary<string, string> patterns)
+        {
+            foreach (var pattern in patterns)
+            {
+                if (!FileContentPatterns.ContainsKey(pattern.Key))
+                {
+                    FileContentPatterns.Add(pattern.Key, pattern.Value);
+                }
+            }
+            return this;
+        }
     }
 }

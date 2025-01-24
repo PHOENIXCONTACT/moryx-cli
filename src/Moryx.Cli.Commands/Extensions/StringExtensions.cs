@@ -13,6 +13,15 @@ namespace Moryx.Cli.Commands.Extensions
             return s;
         }
 
+        public static string Replace(this string s, Dictionary<string, string> dictionary)
+        {
+            foreach (var entry in dictionary)
+            {
+                s = s.Replace(entry.Key, entry.Value);
+            }
+            return s;
+        }
+
         public static string Capitalize([NotNull] this string s)
             => s[0].ToString().ToUpper() + s.Substring(1);
     }

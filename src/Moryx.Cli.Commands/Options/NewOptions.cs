@@ -19,5 +19,8 @@ namespace Moryx.Cli.Commands.Options
 
         [DefaultValue(false)]
         public bool Pull { get; set; }
+
+        [DefaultValue(false)]
+        public bool Force { get; set; }
     }
 }

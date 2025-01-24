@@ -9,23 +9,27 @@ namespace Moryx.Cli.Commands
         public static CommandResult Exec(TemplateSettings settings, IEnumerable<string> resources)
         {
             return CommandBase.Exec(settings, (filenames)
-                => resources.Select(resource => AddThing.Exec(
-                    settings,
-                    new AddConfig
+                => resources.Select(resource =>
+                {
+                    var addConfig = new AddConfig
                     {
                         SolutionName = settings.AppName,
                         ThingName = $"{resource}Resource",
                         Thing = "resource",
-                        ThingPlaceholders = 
-                        [
-                            Template.Template.ResourcePlaceholder, 
+                        ThingPlaceholders =
+                            [
+                                Template.Template.ResourcePlaceholder,
                             Template.Template.ResourcePlaceholder2
-                        ],
-                    },
-                    filenames.Resource()
-                    ))
-                    .ToArray()
-                    .Flatten());
+                            ],
+                    };
+                    return AddThing.Exec(
+                        settings,
+                        addConfig,
+                        filenames.Resource()
+                    );
+                })
+                .ToArray()
+                .Flatten());
         }
     }
 }
