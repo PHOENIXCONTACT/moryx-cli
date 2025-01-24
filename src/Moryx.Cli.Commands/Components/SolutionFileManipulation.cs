@@ -1,11 +1,4 @@
-﻿using Microsoft.Build.Construction;
-using Microsoft.CodeAnalysis;
-using Moryx.Cli.Template.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Moryx.Cli.Template.Models;
 
 namespace Moryx.Cli.Commands.Components
 {
@@ -17,7 +10,7 @@ namespace Moryx.Cli.Commands.Components
         {
             if (projectFileName == null)
                 return;
-            var solutionFileName = Path.Combine(settings.AppName, $"{settings.AppName}.sln");
+            var solutionFileName = Path.Combine($"{settings.AppName}.sln");
 
 
             // It'd be prefered to utilize Roslyn to add the project to the
@@ -27,13 +20,13 @@ namespace Moryx.Cli.Commands.Components
 
             // This is 'the' GUID used for `.csproj` inside `.sln`s. Got it from
             // `SolutionFile` of `Microsoft.Build.Construction`
-            const string csharpProjectGuid = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}";
+            const string csharpProjectGuid = "{9A19103F-16F7-4668-BE54-9A1E7A4F7556}";
             var guid = Guid.NewGuid().ToString("B").ToUpper();
 
 
             var filename = Path.GetFileNameWithoutExtension(projectFileName);
             var relativePath = Path.GetRelativePath(settings.TargetDirectory, projectFileName);
-            var str = $"Project(\"{csharpProjectGuid}\") = \"{filename}\", \"{relativePath}\", \"{{{guid}}}\"\nEndProject\n";
+            var str = $"Project(\"{csharpProjectGuid}\") = \"{filename}\", \"{relativePath}\", \"{{{guid}}}\"\nEndProject";
 
             var lines = File.ReadAllLines(solutionFileName);
             using var fileWriter = new StreamWriter(solutionFileName);

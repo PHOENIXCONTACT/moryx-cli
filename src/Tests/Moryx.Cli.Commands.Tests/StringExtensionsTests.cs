@@ -2,7 +2,7 @@ using Moryx.Cli.Commands.Extensions;
 
 namespace Moryx.Cli.Commands.Tests
 {
-    public class Tests
+    public class StringExtensionsTests
     {
         [SetUp]
         public void Setup()

@@ -79,7 +79,7 @@ namespace Moryx.Cli.Commands
     public class StringReplacements
     {
         public Dictionary<string, string> FileNamePatterns { get; }
-        public Dictionary<string, string> FileContentPatterns { get; }w
+        public Dictionary<string, string> FileContentPatterns { get; }
 
         public StringReplacements(AddConfig config)
         {

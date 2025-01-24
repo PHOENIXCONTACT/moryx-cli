@@ -1,8 +1,9 @@
 using Microsoft.CodeAnalysis;
 using Moryx.Cli.Template.Extensions;
 using Moryx.Cli.Template.StateBaseTemplate;
+using Moryx.Cli.Tests.Extensions;
 
-namespace Moryx.Cli.Tests.StateBaseTests
+namespace Moryx.Cli.Tests.CSharpFileTests
 {
     public class ExistingStateBaseTests
     {
@@ -11,7 +12,7 @@ namespace Moryx.Cli.Tests.StateBaseTests
         [SetUp]
         public void Setup()
         {
-            _sut = StateBaseTemplate.FromFile("StateBaseTests\\TestData\\AssemblingResourceStateBase.cs".Replace('\\', Path.DirectorySeparatorChar));
+            _sut = StateBaseTemplate.FromFile("CSharpFileTests\\TestData\\AssemblingResourceStateBase.cs".OsAware());
         }
 
         [Test]

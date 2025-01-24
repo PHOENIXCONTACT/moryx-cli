@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Moryx.Cli": {
-      "commandName": "Project",
-      "commandLineArgs": "new ReTwoPli --steps Assembling -f --no-git-init"
+      "commandName": "Project"
     }
   }
 }

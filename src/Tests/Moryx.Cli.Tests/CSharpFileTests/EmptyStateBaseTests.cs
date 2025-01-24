@@ -2,8 +2,9 @@ using Microsoft.CodeAnalysis;
 using Moryx.Cli.Template.Exceptions;
 using Moryx.Cli.Template.Extensions;
 using Moryx.Cli.Template.StateBaseTemplate;
+using Moryx.Cli.Tests.Extensions;
 
-namespace Moryx.Cli.Tests.StateBaseTests
+namespace Moryx.Cli.Tests.CSharpFileTests
 {
     public class EmptyStateBaseTests
     {
@@ -12,7 +13,7 @@ namespace Moryx.Cli.Tests.StateBaseTests
         [SetUp]
         public void Setup()
         {
-            _sut = StateBaseTemplate.FromFile("StateBaseTests\\TestData\\EmptyResourceStateBase.cs".Replace('\\', Path.DirectorySeparatorChar));
+            _sut = StateBaseTemplate.FromFile("CSharpFileTests\\TestData\\EmptyResourceStateBase.cs".OsAware());
         }
 
         [Test]

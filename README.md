@@ -24,6 +24,31 @@ Adds a product 'name'
 
     moryx add product <NAME>
 
+
+## `add state`
+
+Adds a 'state machine' to a specified context. It adds a folder `States` next
+to the file that contains the context including a `StateBase` and `State` files
+for each provided state. The context will be updated to implement `IStateContext`.
+
+Adding further states later is possible and would add the new states and update
+the existing `StateBase` accordingly.
+
+_Note_: Adding states to the `States` folder may lead conflicts if you try to 
+create states for several contexts that live inside the same path. We recommend
+to move those 'to be contexts' to separate directories or libraries before
+adding state machines in order to maintain a clean project structure.
+
+
+### Usage
+
+    moryx add states <CONTEXT> --states <Comma separated list of states>
+
+Example
+
+    moryx add states AssemblingCell --states "Initialing, Running, Testing"
+
+
  
 ## `add step`
 

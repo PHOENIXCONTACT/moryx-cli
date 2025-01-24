@@ -17,10 +17,10 @@ namespace Moryx.Cli.Commands
                         ThingName = $"{resource}Resource",
                         Thing = "resource",
                         ThingPlaceholders =
-                            [
-                                Template.Template.ResourcePlaceholder,
+                        [
+                            Template.Template.ResourcePlaceholder,
                             Template.Template.ResourcePlaceholder2
-                            ],
+                        ],
                     };
                     return AddThing.Exec(
                         settings,

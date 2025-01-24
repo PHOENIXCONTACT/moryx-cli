@@ -4,6 +4,8 @@ using Moryx.Cli.Commands.Extensions;
 using Moryx.Cli.Template.StateBaseTemplate;
 using Moryx.Cli.Template.Exceptions;
 using Moryx.Cli.Template.StateTemplate;
+using Moryx.Cli.Template.Components;
+using Moryx.AbstractionLayer.Resources;
 
 namespace Moryx.Cli.Commands
 {
@@ -19,16 +21,17 @@ namespace Moryx.Cli.Commands
 
         private static CommandResult Add(TemplateSettings settings, List<string> cleanedResourceNames, string resource, IEnumerable<string> states)
         {
-            if (!ResourceExists(settings, resource))
+            var resourceFile = FindResource(settings, resource);
+            if (string.IsNullOrEmpty(resourceFile))
             {
-                return CommandResult.WithError($"Resource `{resource}` not found. Make sure that a `{resource}.cs` exists in the project.");
+                return CommandResult.WithError($"`{resource}` not found. Make sure that a type `{resource}` exists in the project.");
             }
 
             var projectFileNames = cleanedResourceNames.InitialProjects();
-            var StateBaseFileName = cleanedResourceNames.StateBaseFile();
+            var stateBaseFileName = cleanedResourceNames.StateBaseFile();
 
-            var dictionary = Template.Template.PrepareFileStructure(settings.AppName, StateBaseFileName, projectFileNames);
-            var targetPath = Path.Combine(settings.TargetDirectory, "src", $"{settings.AppName}.Resources", resource);
+            var dictionary = Template.Template.PrepareFileStructure(settings.AppName, stateBaseFileName, projectFileNames);
+            var targetPath = Path.Combine(Path.GetDirectoryName(resourceFile)!, "States");
             var newStateBaseFileName = Path.Combine(targetPath, $"{resource}StateBase.cs");
 
             if (!File.Exists(newStateBaseFileName))
@@ -44,13 +47,14 @@ namespace Moryx.Cli.Commands
                     {
                         { Template.Template.AppPlaceholder, settings.AppName },
                         { Template.Template.StateBasePlaceholder, $"{resource}StateBase" },
+                        { Template.Template.CellPlaceholder, $"{resource}" },
                         { Template.Template.ResourcePlaceholder, resource },
                     });
 
-                if(!states.Any())
+                if (!states.Any())
                 {
-                    states = 
-                    [ 
+                    states =
+                    [
                         "Idle",
                         "ReadyToWork",
                         "Running",
@@ -92,6 +96,7 @@ namespace Moryx.Cli.Commands
                             { Template.Template.AppPlaceholder, settings.AppName },
                             { Template.Template.StatePlaceholder, stateType },
                             { Template.Template.ResourcePlaceholder, resource },
+                            { Template.Template.CellPlaceholder, resource },
                             { Template.Template.StateBasePlaceholder, $"{resource}StateBase" },
                             });
 
@@ -114,7 +119,7 @@ namespace Moryx.Cli.Commands
 
             UpdateResource(
                 settings,
-                resource, 
+                resource,
                 success => msg.Add(success),
                 warning => warnings.Add(warning));
 
@@ -123,51 +128,69 @@ namespace Moryx.Cli.Commands
 
         private static void UpdateResource(TemplateSettings settings, string resource, Action<string> onSuccess, Action<string> onWarning)
         {
-            var dir = Path.Combine(settings.TargetDirectory, "src", $"{settings.AppName}.Resources");
-            var files = Directory.GetFiles(
-                dir,
-                $"{resource}.cs",
-                new EnumerationOptions
-                {
-                    ReturnSpecialDirectories = false,
-                    RecurseSubdirectories = true
-                });
-            if(files.Length == 0)
+            var candidate = FindResource(settings, resource);
+
+            if (string.IsNullOrEmpty(candidate))
             {
-                onWarning($"Filename `{resource}.cs` not found. Could not update resource.");
+                onWarning($"Type `{resource}` not found. Could not update resource.");
                 return;
             }
-            if (files.Length > 1)
-            {
-                onWarning($"Filename `{resource}.cs` is ambiguous. Could not update resource.");
-                return;
-            }
-            var filename = files.Single();
 
             try
             {
-            var template = StateTemplate.FromFile(filename);
-            template = template.ImplementIStateContext(resource);
-            template.SaveToFile(filename);
-                onSuccess($"Updated `{resource}.cs`");
+                var template = StateTemplate.FromFile(candidate);
+                template = template.ImplementIStateContext(resource);
+                template.SaveToFile(candidate);
+                onSuccess($"Updated `{Path.GetFileName(candidate)}`");
             }
             catch (Exception)
             {
-                onWarning($"Failed to update `{resource}.cs`");
+                onWarning($"Failed to update `{Path.GetFileName(candidate)}`");
             }
         }
 
-        private static bool ResourceExists(TemplateSettings settings, string resource)
+        private static string FindResource(TemplateSettings settings, string resourceName)
         {
+            var dir = Path.Combine(settings.TargetDirectory, "src");
             var files = Directory.GetFiles(
-                Path.Combine(settings.TargetDirectory),
-                $"{resource}.cs",
+                dir,
+                $"*.cs",
                 new EnumerationOptions
                 {
                     ReturnSpecialDirectories = false,
                     RecurseSubdirectories = true
-                });
-            return files.Length > 0;
+                })
+                .AsEnumerable();
+
+            var promisingCandidate = files.FirstOrDefault(f => f.EndsWith($"{resourceName}.cs"));
+            if (!string.IsNullOrEmpty(promisingCandidate))
+            {
+                files = files.Prepend(promisingCandidate);
+            }
+
+            var candidate = string.Empty;
+            foreach (var file in files)
+            {
+                if (ContainsType(file, resourceName))
+                {
+                    candidate = file;
+                    break;
+                }
+            }
+            return candidate;
+        }
+
+        private static bool ContainsType(string filename, string typeName)
+        {
+            try
+            {
+                var file = CSharpFile.FromFile(filename);
+                return file.Types.Any(t => t == typeName);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
