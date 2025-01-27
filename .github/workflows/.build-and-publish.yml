@@ -75,12 +75,12 @@ jobs:
         with:
           dotnet-version: ${{ needs.Variables.outputs.dotnet_sdk_version }}
 
-      - name: ♺ Execute nuget restore
-        run: nuget restore
-        if: steps.cache-nuget.outputs.cache-hit != 'true'
-
       - name: 🧰 Setup BuildToolkit
         uses: moryx-industry/setup-buildtoolkit@v1
+
+      - name: ♺ Execute nuget restore
+        run: dotnet restore
+        if: steps.cache-nuget.outputs.cache-hit != 'true'
 
       - name: 🔨 Execute dotnet build
         run: |
