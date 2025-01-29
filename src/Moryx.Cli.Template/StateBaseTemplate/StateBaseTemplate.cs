@@ -17,7 +17,6 @@ namespace Moryx.Cli.Template.StateBaseTemplate
             Parse(_syntaxTree);
         }
 
-        public IEnumerable<ConstructorDeclarationSyntax> Constructors { get; private set; } = [];
         public IEnumerable<StateDefinition> StateDeclarations { get; private set; } = [];
 
         public static StateBaseTemplate FromFile(string fileName)
