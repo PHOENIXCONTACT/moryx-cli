@@ -1,7 +1,7 @@
-﻿using Moryx.Cli.Template.Models;
+﻿using Moryx.Cli.Templates.Models;
 using System.Diagnostics;
 
-namespace Moryx.Cli.Template
+namespace Moryx.Cli.Templates
 {
     public class TemplateRepository
     {

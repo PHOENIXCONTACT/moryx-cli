@@ -1,6 +1,6 @@
 using Moryx.Cli.Commands;
-using Moryx.Cli.Template.Extensions;
-using Moryx.Cli.Template.StateBaseTemplate;
+using Moryx.Cli.Templates.Extensions;
+using Moryx.Cli.Templates.StateBaseTemplate;
 
 namespace Moryx.Cli.Tests.CommandTests
 {

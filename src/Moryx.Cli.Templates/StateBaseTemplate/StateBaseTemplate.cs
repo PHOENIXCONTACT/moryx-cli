@@ -2,10 +2,10 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using Moryx.Cli.Template.Components;
-using Moryx.Cli.Template.Exceptions;
+using Moryx.Cli.Templates.Components;
+using Moryx.Cli.Templates.Exceptions;
 
-namespace Moryx.Cli.Template.StateBaseTemplate
+namespace Moryx.Cli.Templates.StateBaseTemplate
 {
     public partial class StateBaseTemplate : CSharpFileBase
     {

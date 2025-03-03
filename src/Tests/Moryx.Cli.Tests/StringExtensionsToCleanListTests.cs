@@ -1,4 +1,4 @@
-using Moryx.Cli.Template.Extensions;
+using Moryx.Cli.Templates.Extensions;
 
 namespace Moryx.Cli.Tests
 {

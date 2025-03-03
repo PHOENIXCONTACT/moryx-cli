@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Moryx.Cli.Template.Exceptions
+namespace Moryx.Cli.Templates.Exceptions
 {
     /// <summary>
     /// Gets raised when trying to add a state, that already

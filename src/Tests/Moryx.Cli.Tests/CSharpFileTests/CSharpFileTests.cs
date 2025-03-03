@@ -1,4 +1,4 @@
-using Moryx.Cli.Template.Components;
+using Moryx.Cli.Templates.Components;
 using Moryx.Cli.Tests.Extensions;
 
 namespace Moryx.Cli.Tests.CSharpFileTests

@@ -1,8 +1,5 @@
-using Moryx.AbstractionLayer.Capabilities;
-using Moryx.Cli.Template;
+using Moryx.Cli.Templates;
 using Moryx.Cli.Tests.Extensions;
-using System.IO;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Moryx.Cli.Tests
 {
@@ -157,7 +154,7 @@ namespace Moryx.Cli.Tests
         public void AllProjectFilesGetListed()
         {
             var list = _resourceNames;
-            var projects = Template.Template.InitialProjects(list);
+            var projects = Template.InitialProjects(list);
 
             Assert.That(projects.Count, Is.EqualTo(8));
         }
@@ -166,9 +163,9 @@ namespace Moryx.Cli.Tests
         public void ApplicationFilesGetCategorized()
         {
             var list = _resourceNames;
-            var projects = Template.Template.InitialProjects(list);
+            var projects = Template.InitialProjects(list);
 
-            var fileStructure = Template.Template.PrepareFileStructure(SolutionName, list, projects);
+            var fileStructure = Template.PrepareFileStructure(SolutionName, list, projects);
             var project = projects.First(p => p.Name == "MyApplication");
 
             Assert.That(fileStructure[project], Has.Count.EqualTo(10));
@@ -179,9 +176,9 @@ namespace Moryx.Cli.Tests
         public void CheckRootFileCount()
         {
             var list = _resourceNames;
-            var projects = Template.Template.InitialProjects(list);
+            var projects = Template.InitialProjects(list);
 
-            var fileStructure = Template.Template.PrepareFileStructure(SolutionName, list, projects);
+            var fileStructure = Template.PrepareFileStructure(SolutionName, list, projects);
 
             Assert.That(fileStructure.Last().Value, Has.Count.EqualTo(7));
             Assert.That(fileStructure.Last().Key.Name, Is.EqualTo(""));
@@ -191,9 +188,9 @@ namespace Moryx.Cli.Tests
         public void ModuleFilesGetCategorized()
         {
             var list = _resourceNames;
-            var projects = Template.Template.InitialProjects(list);
+            var projects = Template.InitialProjects(list);
 
-            var fileStructure = Template.Template.PrepareFileStructure(SolutionName, list, projects);
+            var fileStructure = Template.PrepareFileStructure(SolutionName, list, projects);
             var project = projects.First(p => p.Name == "MyApplication.MyModule");
 
             Assert.That(fileStructure[project], Has.Count.EqualTo(8));
@@ -206,7 +203,7 @@ namespace Moryx.Cli.Tests
             var projects = resourceNames.InitialProjects();
             var filteredResourceNames = resourceNames.BareProjectFiles();
 
-            var fileStructure = Template.Template.PrepareFileStructure(SolutionName, filteredResourceNames, projects);
+            var fileStructure = Template.PrepareFileStructure(SolutionName, filteredResourceNames, projects);
 
             var flattened = fileStructure.SelectMany(item => item.Value);
             Assert.That(flattened.Count, Is.EqualTo(NumberOfBareFilesCount));

@@ -16,6 +16,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Moryx.Cli.Config\Moryx.Cli.Config.csproj" />
-	  <ProjectReference Include="..\Moryx.Cli.Template\Moryx.Cli.Template.csproj" />
+	  <ProjectReference Include="..\Moryx.Cli.Templates\Moryx.Cli.Templates.csproj" />
 	</ItemGroup>
 </Project>

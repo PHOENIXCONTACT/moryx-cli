@@ -1,9 +1,9 @@
 ﻿using Moryx.Cli.Commands.Options;
-using Moryx.Cli.Template.Extensions;
-using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+using Moryx.Cli.Templates.Extensions;
+using Moryx.Cli.Templates.Models;
 using System.Diagnostics.CodeAnalysis;
 using Moryx.Cli.Commands.Extensions;
+using Moryx.Cli.Templates;
 
 namespace Moryx.Cli.Commands
 {
@@ -66,18 +66,18 @@ namespace Moryx.Cli.Commands
 
         private static void CreateBareSolution(TemplateSettings settings)
         {
-            var cleanedResourceNames = Template.Template.GetCleanedResourceNames(settings);
+            var cleanedResourceNames = Template.GetCleanedResourceNames(settings);
             var projectFilenames = cleanedResourceNames.InitialProjects();
             var filteredResourceNames = FilteredResourceNames(cleanedResourceNames);
 
-            var dictionary = Template.Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFilenames);
+            var dictionary = Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFilenames);
 
-            var files = Template.Template.WriteFilesToDisk(dictionary, settings, s => s);
-            Template.Template.ReplacePlaceHoldersInsideFiles(
+            var files = Template.WriteFilesToDisk(dictionary, settings, s => s);
+            Template.ReplacePlaceHoldersInsideFiles(
                 files,
                 new Dictionary<string, string>
                 {
-                    { Template.Template.AppPlaceholder, settings.AppName }
+                    { Template.AppPlaceholder, settings.AppName }
                 });
         }
 

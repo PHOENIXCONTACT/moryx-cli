@@ -1,4 +1,4 @@
-﻿namespace Moryx.Cli.Template.StateBaseTemplate
+﻿namespace Moryx.Cli.Templates.StateBaseTemplate
 {
     public partial class StateBaseTemplate
     {

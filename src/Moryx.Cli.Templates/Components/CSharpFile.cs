@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Moryx.Cli.Template.Components
+namespace Moryx.Cli.Templates.Components
 {
     public class CSharpFile : CSharpFileBase
     {

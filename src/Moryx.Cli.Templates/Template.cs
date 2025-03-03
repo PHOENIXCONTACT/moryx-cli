@@ -1,9 +1,9 @@
-﻿using Moryx.Cli.Template.Extensions;
-using Moryx.Cli.Template.Models;
+﻿using Moryx.Cli.Templates.Extensions;
+using Moryx.Cli.Templates.Models;
 using System.Diagnostics.CodeAnalysis;
 
 
-namespace Moryx.Cli.Template
+namespace Moryx.Cli.Templates
 {
     public static class Template
     {

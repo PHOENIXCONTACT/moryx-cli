@@ -1,8 +1,8 @@
 ﻿using Castle.Components.DictionaryAdapter;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 using Moryx.Cli.Commands.Extensions;
-using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+using Moryx.Cli.Templates;
+using Moryx.Cli.Templates.Models;
 
 namespace Moryx.Cli.Commands
 {
@@ -29,15 +29,15 @@ namespace Moryx.Cli.Commands
                     {
                         replacements = new StringReplacements(config);
                     }
-                    var dictionary = Template.Template.PrepareFileStructure(config.SolutionName, resourceNames, projectFilenames);
+                    var dictionary = Template.PrepareFileStructure(config.SolutionName, resourceNames, projectFilenames);
 
-                    var files = Template.Template.WriteFilesToDisk(
+                    var files = Template.WriteFilesToDisk(
                         dictionary,
                         settings,
                         s => s.Replace(replacements.FileNamePatterns)
                     );
 
-                    Template.Template.ReplacePlaceHoldersInsideFiles(
+                    Template.ReplacePlaceHoldersInsideFiles(
                         files,
                         replacements.FileContentPatterns);
 
@@ -92,7 +92,7 @@ namespace Moryx.Cli.Commands
             var result = config.ThingPlaceholders
                 .ToDictionary(s => s, s => config.ThingName);
 
-            result.TryAdd(Template.Template.AppPlaceholder, config.SolutionName);
+            result.TryAdd(Template.AppPlaceholder, config.SolutionName);
             return result;
         }
 

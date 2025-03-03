@@ -1,5 +1,5 @@
-﻿using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+﻿using Moryx.Cli.Templates;
+using Moryx.Cli.Templates.Models;
 using Moryx.Products.Management;
 using Moryx.Runtime.Kernel;
 
@@ -25,18 +25,18 @@ namespace Moryx.Cli.Commands
             {
                 try
                 {
-                    var dictionary = Template.Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFilenames);
+                    var dictionary = Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFilenames);
 
-                    var files = Template.Template.WriteFilesToDisk(
+                    var files = Template.WriteFilesToDisk(
                         dictionary,
                         settings,
                         s => s.ReplaceProductName(product));
-                    Template.Template.ReplacePlaceHoldersInsideFiles(
+                    Template.ReplacePlaceHoldersInsideFiles(
                         files,
                         new Dictionary<string, string>
                         {
-                            { Template.Template.AppPlaceholder, settings.AppName },
-                            { Template.Template.ProductPlaceholder, product },
+                            { Template.AppPlaceholder, settings.AppName },
+                            { Template.ProductPlaceholder, product },
                         });
 
                     UpdateProductConfig(settings, product);
