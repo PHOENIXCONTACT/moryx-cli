@@ -1,6 +1,7 @@
 ﻿using Moryx.Cli.Templates.Extensions;
 using Moryx.Cli.Templates.Models;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 
 namespace Moryx.Cli.Templates
@@ -29,6 +30,28 @@ namespace Moryx.Cli.Templates
                 });
           
             return files.ToList();
+        }
+
+        public static List<string> FilterByPattern(this List<string> list, string root, ConfigurationPattern pattern)
+        {
+            var trimmed = list.Select(list => list.Replace(root, ""))
+
+                .Where(s => pattern.Files.Any(p => Matches(s, p)))
+                .ToList();
+            return trimmed;
+        }
+
+        private static bool Matches(string input, string pattern)
+        {
+            string separator = $"{Path.DirectorySeparatorChar}";
+            if (separator == "\\") {
+                separator = "\\\\";
+            }
+            string regexPattern = "^" + Regex.Escape(pattern)
+                .Replace(@$"\*\*/{separator}", $"(.*{separator})?")
+                .Replace(@"\*", @$"[^{separator}]*")
+                .Replace(@"\?", @$"[^{separator}]") + "$";
+            return Regex.IsMatch(input, regexPattern, RegexOptions.IgnoreCase);
         }
 
         public static List<string> BareProjectFiles(this List<string> list)

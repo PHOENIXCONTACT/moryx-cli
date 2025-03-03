@@ -26,7 +26,7 @@ namespace Moryx.Cli.Commands
 
                     { $"{Template.AppPlaceholder}.Resources", $"{settings.AppName}.Resources.{step}" },
                     { $"{settings.AppName}.Resources", $"{settings.AppName}.Resources.{step}" }
-                };
+                };  
                 var replacements = new StringReplacements(addConfig)
                     .AddFileNamePatterns(namespacePlaceholder)
                     .AddContentPatterns(namespacePlaceholder)
