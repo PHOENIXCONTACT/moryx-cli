@@ -9,16 +9,9 @@ namespace Moryx.Cli.Commands
         public static CommandResult Exec(TemplateSettings settings, IEnumerable<string> cells)
         {
             return CommandBase.Exec(settings, (filenames) 
-                => cells.Select(step => AddThing.Exec(
+                => cells.Select(step => AddStep.Exec(
                     settings,
-                    new AddConfig
-                    {
-                        SolutionName = settings.AppName,
-                        ThingName = step,
-                        Thing = "step",
-                        ThingPlaceholders = [Template.Template.StepPlaceholder],
-                    },
-                    filenames.Step()
+                    step
                     ))
                     .ToArray()
                     .Flatten());

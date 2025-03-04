@@ -26,7 +26,7 @@ namespace Moryx.Cli.Tests.CommandTests
                     Assert.That(s, Does.Not.Contain("State.cs"));
                     Assert.That(s, Does.Not.Contain("StateBase.cs"));
                 });
-
+                Assert.That(filteredNames.Any(s => s.EndsWith("MyApplication.Resources.csproj")), Is.True);
                 Assert.That(filteredNames, Has.Count.EqualTo(InitialProjectFilesCount));
             });
         }

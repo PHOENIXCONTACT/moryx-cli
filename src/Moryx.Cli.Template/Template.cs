@@ -10,7 +10,8 @@ namespace Moryx.Cli.Template
         public const string AppPlaceholder = "MyApplication";
         public const string ProductPlaceholder = "MyProduct";
         public const string ModulePlaceholder = "MyModule";
-        public const string StepPlaceholder = "SomeCell";
+        public const string StepPlaceholder = "Some";
+        public const string CellPlaceholder = "SomeCell";
         public const string StateBasePlaceholder = "SomeStateBase";
         public const string StatePlaceholder = "SpecificState";
         public const string ResourcePlaceholder = "SomeResource";
@@ -31,7 +32,9 @@ namespace Moryx.Cli.Template
         }
 
         public static List<string> BareProjectFiles(this List<string> list)
-            => list
+        {
+            var keep = list.ResourcesProject();
+            var shrinked = list
                 .WithoutStep()
                 .WithoutProduct()
                 .WithoutRecipe()
@@ -41,6 +44,10 @@ namespace Moryx.Cli.Template
                 .WithoutResource()
                 .WithoutState()
                 ;
+
+            shrinked.AddRange(keep);
+            return shrinked;
+        }
 
         public static List<string> WithoutProduct(this List<string> list)
         {
@@ -106,6 +113,19 @@ namespace Moryx.Cli.Template
                 .Where(e => e.Contains("Some"))
                 .ToList();
             whitelist.Add("SimulatedInOutDriver.cs");
+            whitelist.Add("MyApplication.Resources.csproj");
+
+            return list
+                .Intersect(whitelist, new ListComparer())
+                .ToList();
+        }
+
+        public static List<string> ResourcesProject(this List<string> list)
+        {
+            var whitelist = new List<string>
+            {
+                "MyApplication.Resources.csproj"
+            };
 
             return list
                 .Intersect(whitelist, new ListComparer())

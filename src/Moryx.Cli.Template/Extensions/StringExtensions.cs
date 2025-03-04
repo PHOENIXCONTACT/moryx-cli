@@ -17,5 +17,7 @@
             }
             return str.Remove(position).Insert(position, newStr);
         }
+
+        public static string StateBase(this string str) => str + "StateBase";
     }
 }

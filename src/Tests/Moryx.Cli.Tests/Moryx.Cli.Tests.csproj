@@ -10,15 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="StateBaseTests\TestData\AssemblingResourceStateBase.cs" />
-    <Compile Remove="StateBaseTests\TestData\EmptyResourceStateBase.cs" />
+    <Compile Remove="CSharpFileTests\TestData\AssemblingResourceStateBase.cs" />
+    <Compile Remove="CSharpFileTests\TestData\EmptyResourceStateBase.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="StateBaseTests\TestData\AssemblingResourceStateBase.cs">
+    <None Include="CSharpFileTests\TestData\AssemblingResourceStateBase.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="StateBaseTests\TestData\EmptyResourceStateBase.cs">
+    <None Include="CSharpFileTests\TestData\EmptyResourceStateBase.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

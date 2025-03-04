@@ -1,29 +1,26 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Simplification;
+using Moryx.Cli.Template.Components;
 using Moryx.Cli.Template.Exceptions;
+using Moryx.Cli.Template.Extensions;
 
 namespace Moryx.Cli.Template.StateTemplate
 {
-    public class StateTemplate
+    public class StateTemplate : CSharpFileBase
     {
-        private string _content;
+        private const string StateContextInterface = "IStateContext";
 
-        public string Content { get => _content; } 
-
-        public StateTemplate(string content)
+        public StateTemplate(string content) : base(content)
         {
-            _content = content;
         }
 
         public static StateTemplate FromFile(string fileName)
         {
-            if(!File.Exists(fileName))
+            if (!File.Exists(fileName))
             {
-                throw new FileNotFoundException(fileName); 
+                throw new FileNotFoundException(fileName);
             }
             var content = File.ReadAllText(fileName);
             return new StateTemplate(content);
@@ -31,19 +28,89 @@ namespace Moryx.Cli.Template.StateTemplate
 
         public StateTemplate ImplementIStateContext(string resource)
         {
-            var root = CSharpSyntaxTree.ParseText(_content).GetRoot();
-            var resourceClass = root.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault(n => n.Identifier.Text == resource);
+            var root = _syntaxTree.GetRoot();
+            var contextClass = root.FindClass(resource);
 
-            if (resourceClass == null)
+            if (contextClass == null)
             {
                 throw new TypeNotFoundException(resource);
             }
 
-            if (!resourceClass.BaseList?.Types.Any(t => ((IdentifierNameSyntax)t.Type).Identifier.ValueText == "IStateContext") ?? false)
+            root = UpdateClassDefinition(root, resource);
+            root = TryToAddInitializing(root, resource);
+            root = AddStateProperty(root, resource);
+
+            return new StateTemplate(root.ToFullString());
+        }
+
+        
+
+        private SyntaxNode TryToAddInitializing(SyntaxNode root, string context)
+        {
+            var contextClass = root.FindClass(context);
+            if (contextClass == null)
+                return root;
+
+            var initializationText = $"StateMachine.Initialize(this).With<{context.StateBase()}>();\n";
+            if (contextClass.ToFullString().Contains("StateMachine.Initialize"))
+                return root;
+
+            var initializeMethod = contextClass.DescendantNodes().OfType<MethodDeclarationSyntax>().FirstOrDefault(m => m.Identifier.Text == "OnInitialize");
+            if (initializeMethod != null)
             {
-                var newClass = resourceClass.AddBaseListTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName("IStateContext")));
+                var stateInitialization = SyntaxFactory.ParseStatement(initializationText);
+                var updatedMethodBody = initializeMethod.Body?.AddStatements(stateInitialization) ?? null;
+                var updatedMethod = initializeMethod.WithBody(updatedMethodBody);
+
+                return root.ReplaceNode(initializeMethod, updatedMethod);
+            }
+            else
+            {
+                var lastMethod = contextClass.DescendantNodes().OfType<MethodDeclarationSyntax>().LastOrDefault();
+                if (lastMethod != null)
+                {
+                    var comment = SyntaxFactory.Comment("\n\n// Please, remember to initialize the `StateMachine`:\n" + initializationText);
+                    var updatedMethod = lastMethod.WithTrailingTrivia(comment);
+
+                    return root.ReplaceNode(lastMethod, updatedMethod);
+                }
+            }
+            return root;
+        }
+
+        private SyntaxNode AddStateProperty(SyntaxNode root, string context)
+        {
+            var contextClass = root.FindClass(context);
+            if (contextClass == null)
+                return root;
+
+            var existingProperty = root.DescendantNodes().OfType<PropertyDeclarationSyntax>().FirstOrDefault(p => p.Identifier.Text == "State");
+            if (existingProperty != null)
+                return root;
+
+            var stateProperty = SyntaxFactory
+                .PropertyDeclaration(SyntaxFactory.ParseTypeName(context.StateBase()), "State")
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.InternalKeyword))
+                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(SyntaxFactory.ParseExpression($"({context.StateBase()})CurrentState")))
+                .NormalizeWhitespace()
+                ;
+
+            return InsertMemberBeforeConstructor(root, contextClass, stateProperty);
+        }
+
+
+        private static SyntaxNode UpdateClassDefinition(SyntaxNode root, string context)
+        {
+            var contextClass = root.FindClass(context);
+            if(contextClass == null)
+                return root;
+
+            if (!contextClass.BaseList?.Types.Any(t => ((IdentifierNameSyntax)t.Type).Identifier.ValueText == StateContextInterface) ?? false)
+            {
+                var newClass = contextClass.AddBaseListTypes(SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseTypeName(StateContextInterface)));
                 root = root
-                    .ReplaceNode(resourceClass, newClass);
+                    .ReplaceNode(contextClass, newClass);
 
                 root = Formatter.Format(root, new AdhocWorkspace());
 
@@ -58,15 +125,9 @@ namespace Moryx.Cli.Template.StateTemplate
                 }
 
                 root = Formatter.Format(root, new AdhocWorkspace());
-
             }
 
-            return new StateTemplate(root.ToFullString());
-        }
-
-        public void SaveToFile(string filename)
-        {
-            File.WriteAllText(filename, Content);
+            return root;
         }
     }
 }

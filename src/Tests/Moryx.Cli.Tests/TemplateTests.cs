@@ -1,10 +1,16 @@
+using Moryx.AbstractionLayer.Capabilities;
 using Moryx.Cli.Template;
+using Moryx.Cli.Tests.Extensions;
+using System.IO;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Moryx.Cli.Tests
 {
     public class TemplateTests
     {
         private const int NumberOfResources = 56;
+        private const int NumberOfStepFiles = 10;
+        private const int NumberOfBareFilesCount = 28;
         private const string SolutionName = "UnitTestSolution";
         private List<string> _resourceNames;
 
@@ -45,7 +51,7 @@ namespace Moryx.Cli.Tests
             var list = _resourceNames
                 .WithoutStep();
 
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 9));
+            Assert.That(list, Has.Count.EqualTo(NumberOfResources - NumberOfStepFiles));
         }        
         
         [Test]
@@ -90,7 +96,28 @@ namespace Moryx.Cli.Tests
             var list = _resourceNames
                 .Step();
 
-            Assert.That(list, Has.Count.EqualTo(9));
+            Assert.That(list, Has.Count.EqualTo(NumberOfStepFiles));
+        }
+
+        [Test]
+        public void CheckStepFiles()
+        {
+            var list = _resourceNames
+                .Step();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication.Resources\MyApplication.Resources.csproj".OsAware()));
+                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication.Resources\SimulatedInOutDriver.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication.Resources\SomeCell.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Capabilities\SomeCapabilities.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Resources\ISomeResource.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"C:\<path>\src\Tests\MyApplication.Tests\SomeResourceTest.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Activities\SomeStep\SomeActivity.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Activities\SomeStep\SomeActivityResults.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Activities\SomeStep\SomeParameters.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Activities\SomeStep\SomeTask.cs".OsAware()));
+            });
         }
 
         [Test]
@@ -182,7 +209,7 @@ namespace Moryx.Cli.Tests
             var fileStructure = Template.Template.PrepareFileStructure(SolutionName, filteredResourceNames, projects);
 
             var flattened = fileStructure.SelectMany(item => item.Value);
-            Assert.That(flattened.Count, Is.EqualTo(28));
+            Assert.That(flattened.Count, Is.EqualTo(NumberOfBareFilesCount));
         }
 
         [Test]
@@ -191,7 +218,7 @@ namespace Moryx.Cli.Tests
             var resourceNames = _resourceNames;
             var filteredResourceNames = resourceNames.BareProjectFiles();
 
-            Assert.That(filteredResourceNames, Has.Count.EqualTo(28));
+            Assert.That(filteredResourceNames, Has.Count.EqualTo(NumberOfBareFilesCount));
         }
 
         [Test]

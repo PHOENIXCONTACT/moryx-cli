@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		Directory.Build.targets = Directory.Build.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moryx.Cli.Commands.Tests", "src\Tests\Moryx.Cli.Commands.Tests\Moryx.Cli.Commands.Tests.csproj", "{4C082129-3A6D-4A72-80DC-8A9D3A71A79F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,12 +48,17 @@ Global
 		{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C082129-3A6D-4A72-80DC-8A9D3A71A79F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C082129-3A6D-4A72-80DC-8A9D3A71A79F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C082129-3A6D-4A72-80DC-8A9D3A71A79F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C082129-3A6D-4A72-80DC-8A9D3A71A79F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E65D2591-A889-4F42-A6F5-AECAFB77DBB0} = {6FC4CD2F-8BFA-4EC1-84A9-D3670BA92E4D}
+		{4C082129-3A6D-4A72-80DC-8A9D3A71A79F} = {6FC4CD2F-8BFA-4EC1-84A9-D3670BA92E4D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {99BD1616-551D-473A-A6DB-6A9C0F030AB7}

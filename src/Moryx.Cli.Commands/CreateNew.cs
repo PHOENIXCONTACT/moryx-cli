@@ -12,11 +12,26 @@ namespace Moryx.Cli.Commands
         public static CommandResult Solution(NewOptions options, [NotNull] Action<string> onStatus)
         {
             var solutionName = options.Name!;
+            var dir = Path.Combine(Directory.GetCurrentDirectory(), solutionName);
+
             if (Directory.Exists(solutionName))
             {
-                return CommandResult.WithError($"A directory {solutionName} already exists.");
+                if (options.Force)
+                {
+                    try
+                    {
+                        Directory.Delete(dir, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        return CommandResult.WithError(ex.Message);
+                    }
+                }
+                else
+                {
+                    return CommandResult.WithError($"A directory {solutionName} already exists.");
+                }
             }
-            var dir = Path.Combine(Directory.GetCurrentDirectory(), solutionName);
             var config = options.ToConfiguration();
             var settings = config.AsTemplateSettings(dir, solutionName);
             settings.Pull = options.Pull;
@@ -27,14 +42,15 @@ namespace Moryx.Cli.Commands
                 CreateBareSolution(settings);
                 config.Save(dir);
 
+                var results = new List<CommandResult>();
                 if ((options.Steps ?? "").Any())
                 {
-                    AddSteps.Exec(settings, options.Steps!.ToCleanList());
+                    results.Add(AddSteps.Exec(settings, options.Steps!.ToCleanList()));
                 }
 
                 if ((options.Products ?? "").Any())
                 {
-                    AddProducts.Exec(settings, options.Products!.ToCleanList());
+                    results.Add(AddProducts.Exec(settings, options.Products!.ToCleanList()));
                 }
 
                 if (!options.NoGitInit)
@@ -42,7 +58,9 @@ namespace Moryx.Cli.Commands
                     InitializeGitRepo(settings.AppName, onStatus);
                 }
 
-                return CommandResult.IsOk($"Initialized new solution {solutionName}");
+                return CommandResult
+                    .IsOk($"Initialized new solution {solutionName}")
+                    .CouldHaveIssues(results);
             });
         }
 
@@ -66,14 +84,7 @@ namespace Moryx.Cli.Commands
         public static List<string> FilteredResourceNames(List<string> resourceNames)
         {
             return resourceNames
-                .WithoutStep()
-                .WithoutProduct()
-                .WithoutRecipe()
-                .WithoutSetupTrigger()
-                .WithoutCellSelector()
-                .WithoutModule()
-                .WithoutResource()
-                .WithoutState()
+                .BareProjectFiles()
                 ;
         }
 
