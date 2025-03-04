@@ -22,7 +22,7 @@ namespace Moryx.Cli.Templates
             {
                 return ExecCommanLine($"git -C {targetDir} pull", _ => onStatus?.Invoke(_));
             }
-            return -1;
+            return 0;
         }
 
         public static int ExecCommanLine(string command, Action<string> onStatus)
