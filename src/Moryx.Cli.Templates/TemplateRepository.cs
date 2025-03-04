@@ -7,16 +7,22 @@ namespace Moryx.Cli.Templates
     {
         public static void Clone(TemplateSettings settings)
         {
+            Clone(settings, null);
+        }
+
+        public static int Clone(TemplateSettings settings, Action<string>? onStatus = null)
+        {
             var targetDir = settings.SourceDirectory;
 
             if (!Directory.Exists(targetDir) || Directory.GetFiles(targetDir).Length == 0)
             {
-                ExecCommanLine($"git clone {settings.Repository} -b {settings.Branch} --depth 1 --single-branch {targetDir}", _ => { });
+                return ExecCommanLine($"git clone {settings.Repository} -b {settings.Branch} --depth 1 --single-branch {targetDir}", _ => onStatus?.Invoke(_));
             }
-            else if(settings.Pull)
+            else if (settings.Pull)
             {
-                ExecCommanLine($"git -C {targetDir} pull", _ => { });
+                return ExecCommanLine($"git -C {targetDir} pull", _ => onStatus?.Invoke(_));
             }
+            return -1;
         }
 
         public static int ExecCommanLine(string command, Action<string> onStatus)

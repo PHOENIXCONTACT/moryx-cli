@@ -5,17 +5,24 @@ namespace Moryx.Cli.Commands.Extensions
 {
     public static class ConfigExtensions
     {
-        public static TemplateSettings AsTemplateSettings(this Config.Models.Configuration configuration, string dir, string solutionName, string profile = "default")
-            => new()
+        public static TemplateSettings AsTemplateSettings(this Config.Models.Configuration configuration, string dir, string solutionName, string profile = null)
+        {
+            profile = string.IsNullOrEmpty(profile) ? configuration.DefaultProfile : profile;
+            return new()
             {
                 Branch = configuration.Profiles[profile].Branch,
                 Repository = configuration.Profiles[profile].Repository,
                 AppName = solutionName,
                 TargetDirectory = dir,
             };
+        }
 
-        public static TemplateSettings LoadSettings(string dir, string solutionName, string profile = "default")
-            => Config.Models.Configuration.Load(dir).AsTemplateSettings(dir, solutionName, profile);
+        public static TemplateSettings LoadSettings(string dir, string solutionName, string profile = "")
+        {
+            var config = Config.Models.Configuration.Load(dir);
+            profile = string.IsNullOrEmpty(profile) ? config.DefaultProfile : profile;
+            return config.AsTemplateSettings(dir, solutionName, profile);
+        }
 
         public static Config.Models.Configuration ToConfiguration(this NewOptions options, string profile = "default")
         {
