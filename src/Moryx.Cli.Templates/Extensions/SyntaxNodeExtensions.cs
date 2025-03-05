@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Moryx.Cli.Template.Extensions
+namespace Moryx.Cli.Templates.Extensions
 {
     internal static class SyntaxNodeExtensions
     {

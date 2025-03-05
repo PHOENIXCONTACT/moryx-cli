@@ -1,6 +1,6 @@
 ﻿using Moryx.Cli.Commands.Extensions;
-using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+using Moryx.Cli.Templates;
+using Moryx.Cli.Templates.Models;
 
 namespace Moryx.Cli.Commands
 {
@@ -18,8 +18,8 @@ namespace Moryx.Cli.Commands
                         Thing = "resource",
                         ThingPlaceholders =
                         [
-                            Template.Template.ResourcePlaceholder,
-                            Template.Template.ResourcePlaceholder2
+                            Template.ResourcePlaceholder,
+                            Template.ResourcePlaceholder2
                         ],
                     };
                     return AddThing.Exec(

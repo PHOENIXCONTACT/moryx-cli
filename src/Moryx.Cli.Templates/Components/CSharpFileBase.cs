@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Moryx.Cli.Template.StateBaseTemplate.StateBaseTemplate;
+using static Moryx.Cli.Templates.StateBaseTemplate.StateBaseTemplate;
 
-namespace Moryx.Cli.Template.Components
+namespace Moryx.Cli.Templates.Components
 {
     public class CSharpFileBase
     {

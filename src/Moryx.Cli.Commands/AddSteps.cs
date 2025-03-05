@@ -1,6 +1,5 @@
 ﻿using Moryx.Cli.Commands.Extensions;
-using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+using Moryx.Cli.Templates.Models;
 
 namespace Moryx.Cli.Commands
 {

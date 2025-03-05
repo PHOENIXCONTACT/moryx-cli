@@ -1,7 +1,8 @@
-﻿using Moryx.Cli.Template.Extensions;
+﻿using Moryx.Cli.Templates.Extensions;
 using Moryx.Cli.Commands.Options;
-using Moryx.Cli.Template.Models;
+using Moryx.Cli.Templates.Models;
 using Moryx.Cli.Commands.Extensions;
+using Moryx.Cli.Templates;
 
 namespace Moryx.Cli.Commands
 {
@@ -53,7 +54,7 @@ namespace Moryx.Cli.Commands
         {
             var currentDir = Environment.CurrentDirectory;
             var solutionNameError = string.Empty;
-            var solutionName = Template.Template.GetSolutionName(currentDir, error =>
+            var solutionName = Template.GetSolutionName(currentDir, error =>
             {
                 Console.WriteLine(error);
                 solutionNameError = error;

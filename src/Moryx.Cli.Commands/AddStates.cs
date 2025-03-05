@@ -1,10 +1,10 @@
-﻿using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+﻿using Moryx.Cli.Templates;
+using Moryx.Cli.Templates.Models;
 using Moryx.Cli.Commands.Extensions;
-using Moryx.Cli.Template.StateBaseTemplate;
-using Moryx.Cli.Template.Exceptions;
-using Moryx.Cli.Template.StateTemplate;
-using Moryx.Cli.Template.Components;
+using Moryx.Cli.Templates.StateBaseTemplate;
+using Moryx.Cli.Templates.Exceptions;
+using Moryx.Cli.Templates.StateTemplate;
+using Moryx.Cli.Templates.Components;
 using Moryx.AbstractionLayer.Resources;
 
 namespace Moryx.Cli.Commands
@@ -30,25 +30,25 @@ namespace Moryx.Cli.Commands
             var projectFileNames = cleanedResourceNames.InitialProjects();
             var stateBaseFileName = cleanedResourceNames.StateBaseFile();
 
-            var dictionary = Template.Template.PrepareFileStructure(settings.AppName, stateBaseFileName, projectFileNames);
+            var dictionary = Template.PrepareFileStructure(settings.AppName, stateBaseFileName, projectFileNames);
             var targetPath = Path.Combine(Path.GetDirectoryName(resourceFile)!, "States");
             var newStateBaseFileName = Path.Combine(targetPath, $"{resource}StateBase.cs");
 
             if (!File.Exists(newStateBaseFileName))
             {
-                var files = Template.Template.WriteFilesToDisk(
+                var files = Template.WriteFilesToDisk(
                     dictionary,
                     settings,
                     _ => newStateBaseFileName);
 
-                Template.Template.ReplacePlaceHoldersInsideFiles(
+                Template.ReplacePlaceHoldersInsideFiles(
                     files,
                     new Dictionary<string, string>
                     {
-                        { Template.Template.AppPlaceholder, settings.AppName },
-                        { Template.Template.StateBasePlaceholder, $"{resource}StateBase" },
-                        { Template.Template.CellPlaceholder, $"{resource}" },
-                        { Template.Template.ResourcePlaceholder, resource },
+                        { Template.AppPlaceholder, settings.AppName },
+                        { Template.StateBasePlaceholder, $"{resource}StateBase" },
+                        { Template.CellPlaceholder, $"{resource}" },
+                        { Template.ResourcePlaceholder, resource },
                     });
 
                 if (!states.Any())
@@ -80,24 +80,24 @@ namespace Moryx.Cli.Commands
                 {
                     var stateFileName = cleanedResourceNames.StateFile();
 
-                    dictionary = Template.Template.PrepareFileStructure(settings.AppName, stateFileName, projectFileNames);
+                    dictionary = Template.PrepareFileStructure(settings.AppName, stateFileName, projectFileNames);
                     var filename = Path.Combine(targetPath, $"{stateType}.cs");
                     if (!File.Exists(filename))
                     {
-                        var files = Template.Template.WriteFilesToDisk(
+                        var files = Template.WriteFilesToDisk(
                         dictionary,
                         settings,
                         _ => filename);
 
-                        Template.Template.ReplacePlaceHoldersInsideFiles(
+                        Template.ReplacePlaceHoldersInsideFiles(
                             files,
                             new Dictionary<string, string>
                             {
-                            { Template.Template.AppPlaceholder, settings.AppName },
-                            { Template.Template.StatePlaceholder, stateType },
-                            { Template.Template.ResourcePlaceholder, resource },
-                            { Template.Template.CellPlaceholder, resource },
-                            { Template.Template.StateBasePlaceholder, $"{resource}StateBase" },
+                            { Template.AppPlaceholder, settings.AppName },
+                            { Template.StatePlaceholder, stateType },
+                            { Template.ResourcePlaceholder, resource },
+                            { Template.CellPlaceholder, resource },
+                            { Template.StateBasePlaceholder, $"{resource}StateBase" },
                             });
 
                         stateBaseTemplate = stateBaseTemplate.AddState(stateType);

@@ -1,4 +1,4 @@
-﻿namespace Moryx.Cli.Template.Exceptions
+﻿namespace Moryx.Cli.Templates.Exceptions
 {
     /// <summary>
     /// Gets raised when an expected type is not found 

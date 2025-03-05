@@ -1,4 +1,4 @@
-﻿namespace Moryx.Cli.Template.Extensions
+﻿namespace Moryx.Cli.Templates.Extensions
 {
     public static class StringExtensions
     {

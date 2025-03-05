@@ -2,8 +2,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Moryx.Cli.Commands.Components;
-using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+using Moryx.Cli.Templates;
+using Moryx.Cli.Templates.Models;
 using Moryx.Configuration;
 using System.Diagnostics;
 
@@ -20,11 +20,11 @@ namespace Moryx.Cli.Commands
                     SolutionName = settings.AppName,
                     ThingName = step,
                     Thing = "step",
-                    ThingPlaceholders = [Template.Template.StepPlaceholder],
+                    ThingPlaceholders = [Template.StepPlaceholder],
                 };
                 var namespacePlaceholder = new Dictionary<string, string> {
 
-                    { $"{Template.Template.AppPlaceholder}.Resources", $"{settings.AppName}.Resources.{step}" },
+                    { $"{Template.AppPlaceholder}.Resources", $"{settings.AppName}.Resources.{step}" },
                     { $"{settings.AppName}.Resources", $"{settings.AppName}.Resources.{step}" }
                 };
                 var replacements = new StringReplacements(addConfig)

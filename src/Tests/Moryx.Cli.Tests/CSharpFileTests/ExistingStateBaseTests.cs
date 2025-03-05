@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
-using Moryx.Cli.Template.Extensions;
-using Moryx.Cli.Template.StateBaseTemplate;
+using Moryx.Cli.Templates.Extensions;
+using Moryx.Cli.Templates.StateBaseTemplate;
 using Moryx.Cli.Tests.Extensions;
 
 namespace Moryx.Cli.Tests.CSharpFileTests

@@ -1,5 +1,5 @@
-﻿using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+﻿using Moryx.Cli.Templates;
+using Moryx.Cli.Templates.Models;
 using System.Text.RegularExpressions;
 
 namespace Moryx.Cli.Commands
@@ -16,7 +16,7 @@ namespace Moryx.Cli.Commands
                     SolutionName = settings.AppName,
                     ThingName = moduleName,
                     Thing = "module",
-                    ThingPlaceholders = [Template.Template.ModulePlaceholder],
+                    ThingPlaceholders = [Template.ModulePlaceholder],
                 },
                 filenames.Module(),
                 s => AddProjectsToSolution(settings, s)

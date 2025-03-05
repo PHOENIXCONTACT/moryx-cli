@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Moryx.Cli.Template.StateBaseTemplate
+namespace Moryx.Cli.Templates.StateBaseTemplate
 {
     public partial class StateBaseTemplate
     {

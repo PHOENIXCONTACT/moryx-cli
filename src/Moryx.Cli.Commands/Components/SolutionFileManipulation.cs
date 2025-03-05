@@ -1,4 +1,4 @@
-﻿using Moryx.Cli.Template.Models;
+﻿using Moryx.Cli.Templates.Models;
 
 namespace Moryx.Cli.Commands.Components
 {

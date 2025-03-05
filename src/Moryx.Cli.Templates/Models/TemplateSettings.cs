@@ -1,4 +1,4 @@
-﻿namespace Moryx.Cli.Template.Models
+﻿namespace Moryx.Cli.Templates.Models
 {
     public class TemplateSettings
     {
