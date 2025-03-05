@@ -78,8 +78,9 @@ namespace Moryx.Cli.Tests.CommandTests
             var filteredNames = _filteredNames
                 .Select(s => s.Replace(@"C:\<path>\".OsAware(), ""))
                 .ToList();
+            var patterns = Template.PreparePatterns(_templateConfiguration.SolutionPlaceholder("Project1"), _templateConfiguration.New);
 
-            var fileStructure = Template.PrepareFileStructure(_templateConfiguration.SolutionPlaceholder("Project1"), filteredNames, _templateConfiguration.New);
+            var fileStructure = Template.PrepareFileStructure(filteredNames, patterns);
             var values = fileStructure.Select(p => p.Value);
 
             Assert.Multiple(() =>

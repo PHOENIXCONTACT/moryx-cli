@@ -1,5 +1,6 @@
 ﻿using Moryx.Cli.Templates.Extensions;
 using Moryx.Cli.Templates.Models;
+using System.Text.Json;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Moryx.Cli.Templates
@@ -54,6 +55,33 @@ namespace Moryx.Cli.Templates
                     }
                 }
             };
+        }
+
+        public static TemplateConfiguration? Load(string filePath, Action<string>? onError = null)
+        {
+            var fileName = GetFileName(filePath);
+            try
+            {
+                using var file = File.OpenRead(fileName);
+                var template = JsonSerializer.Deserialize(file, typeof(TemplateConfiguration)) as TemplateConfiguration;
+                return template;
+            }
+            catch
+            {
+                onError?.Invoke($"Failed to load template at `{fileName}`");
+            }
+
+            return null;
+        }
+
+        private static string GetFileName(string filePath)
+        {
+            if (!filePath.EndsWith(".moryxtpl"))
+            {
+                return Path.Combine(filePath, ".moryxtpl");
+            }
+
+            return filePath;
         }
     }
 }

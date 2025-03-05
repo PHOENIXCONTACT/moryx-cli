@@ -6,10 +6,10 @@ namespace Moryx.Cli.Templates.Extensions
 {
     public static class TemplateConfigurationExtensions
     {
-        public static void Save(this TemplateConfiguration @this, string filename)
+        public static void Save(this TemplateConfiguration @this, string fileName)
         {
             var content = JsonSerializer.Serialize(@this, new JsonSerializerOptions { WriteIndented = true, PropertyNameCaseInsensitive = true });
-            File.WriteAllText(filename, content);
+            File.WriteAllText(fileName, content);
         }
 
         public static Tuple<string, string> SolutionPlaceholder(this TemplateConfiguration @this, string solutionName)

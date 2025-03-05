@@ -283,9 +283,17 @@ namespace Moryx.Cli.Templates
             return dictionary;
         }
 
-        public static Dictionary<string, string> PrepareFileStructure(Tuple<string, string> solutionName, List<string> fileNames, ConfigurationPattern pattern, string identifier = "")
-        {
-            var patterns = pattern.Replacements
+        public static Dictionary<string, string> PrepareFileStructure(List<string> fileNames, Dictionary<string, string> patterns)
+            => fileNames
+                .Select(f => new
+                {
+                    Key = f,
+                    Value = ReplacePlaceholders(f, patterns)
+                })
+                .ToDictionary(x => x.Key, x => x.Value);
+
+        public static Dictionary<string, string> PreparePatterns(Tuple<string, string> solutionName, ConfigurationPattern pattern, string identifier = "")
+            => pattern.Replacements
                 .Select(r => new
                 {
                     r.Key,
@@ -295,18 +303,6 @@ namespace Moryx.Cli.Templates
                 })
                 .ToDictionary(x => x.Key, x => x.Value)
                 ;
-
-            var result = fileNames
-                .Select(f => new
-                {
-                    Key = f,
-                    Value = ReplacePlaceholders(f, patterns)
-                })
-                .ToDictionary(x => x.Key, x => x.Value);
-
-
-            return result;
-        }
 
         private static string ReplacePlaceholders(string f, Dictionary<string, string> patterns)
         {
@@ -334,21 +330,21 @@ namespace Moryx.Cli.Templates
             return result;
         }
 
-        //public static IEnumerable<string> WriteFilesToDisk(Dictionary<string, string> dictionary, TemplateSettings settings, Func<string, string> customReplace)
-        //{
-        //    var result = new List<string>();
-        //    foreach (var pair in dictionary.SelectMany(pair => pair.Value))
-        //    {
-        //        var newFilename = customReplace(pair.Replace(settings.SourceDirectory, settings.TargetDirectory)).Replace(AppPlaceholder, settings.AppName);
-        //        var path = Path.Combine(settings.TargetDirectory, pair);
+        public static IEnumerable<string> WriteFilesToDisk(Dictionary<string, string> dictionary, TemplateSettings settings, bool force = false)
+        {
+            var result = new List<string>();
+            foreach (var pair in dictionary)
+            {
+                var from = Path.Combine(settings.SourceDirectory, pair.Key);
+                var to = Path.Combine(settings.TargetDirectory, pair.Value);
 
-        //        Directory.CreateDirectory(Path.GetDirectoryName(newFilename) ?? "");
-        //        File.Copy(pair, newFilename, true);
-        //        result.Add(newFilename);
-        //    }
+                Directory.CreateDirectory(Path.GetDirectoryName(to) ?? "");
+                File.Copy(from, to, force);
+                result.Add(to);
+            }
 
-        //    return result;
-        //}
+            return result;
+        }
 
         public static string ReplaceProductName(this string str, string productName)
             => str.Replace(ProductPlaceholder, productName);

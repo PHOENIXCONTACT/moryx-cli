@@ -39,7 +39,7 @@ namespace Moryx.Cli.Commands
             return CommandBase.Exec(settings, (filenames) =>
             {
                 Directory.CreateDirectory(solutionName);
-                CreateBareSolution(settings);
+                CreateBareSolution(settings, filenames);
                 config.Save(dir);
 
                 var results = new List<CommandResult>();
@@ -64,21 +64,19 @@ namespace Moryx.Cli.Commands
             });
         }
 
-        private static void CreateBareSolution(TemplateSettings settings)
+        private static void CreateBareSolution(TemplateSettings settings, List<string> fileNames)
         {
-            var cleanedResourceNames = Template.GetCleanedResourceNames(settings);
-            var projectFilenames = cleanedResourceNames.InitialProjects();
-            var filteredResourceNames = FilteredFileNames(settings.SourceDirectory, cleanedResourceNames, new());
+            var template = TemplateConfigurationFactory.Load(settings.SourceDirectory);
+            if (template == null)
+                return;
 
-            var dictionary = Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFilenames);
+            var filteredResourceNames = FilteredFileNames(settings.SourceDirectory, fileNames, template);
 
-            var files = Template.WriteFilesToDisk(dictionary, settings, s => s);
-            Template.ReplacePlaceHoldersInsideFiles(
-                files,
-                new Dictionary<string, string>
-                {
-                    { Template.AppPlaceholder, settings.AppName }
-                });
+            var patterns = Template.PreparePatterns(template.SolutionPlaceholder(settings.AppName), template.New);
+            var dictionary = Template.PrepareFileStructure(filteredResourceNames, patterns);
+
+            var files = Template.WriteFilesToDisk(dictionary, settings);
+            Template.ReplacePlaceHoldersInsideFiles(files, patterns);
         }
 
         public static List<string> FilteredFileNames(string root, List<string> resourceNames, TemplateConfiguration templateConfig)
