@@ -1,5 +1,6 @@
 using Moryx.Cli.Commands;
 using Moryx.Cli.Templates;
+using Moryx.Cli.Templates.Extensions;
 using Moryx.Cli.Templates.Models;
 using Moryx.Cli.Tests.Extensions;
 using NUnit.Framework.Constraints;
@@ -20,7 +21,7 @@ namespace Moryx.Cli.Tests.CommandTests
             _sourceDirectory = DummyFileList.SourceDir();
             _files = DummyFileList.Get();
             _templateConfiguration = TemplateConfigurationFactory.Default();
-            _filteredNames = CreateNew.FilteredResourceNames(_sourceDirectory, _files, _templateConfiguration);
+            _filteredNames = CreateNew.FilteredFileNames(_sourceDirectory, _files, _templateConfiguration);
         }
 
         [Test]
@@ -70,6 +71,50 @@ namespace Moryx.Cli.Tests.CommandTests
 
             });
         }
+
+        [Test]
+        public void CheckPreparedFileStructure()
+        {
+            var filteredNames = _filteredNames
+                .Select(s => s.Replace(@"C:\<path>\".OsAware(), ""))
+                .ToList();
+
+            var fileStructure = Template.PrepareFileStructure(_templateConfiguration.SolutionPlaceholder("Project1"), filteredNames, _templateConfiguration.New);
+            var values = fileStructure.Select(p => p.Value);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(values, HasAny.EndingWith(@".gitignore"));
+                Assert.That(values, HasAny.EndingWith(@"Directory.Build.props"));
+                Assert.That(values, HasAny.EndingWith(@"Directory.Build.targets"));
+                Assert.That(values, HasAny.EndingWith(@"Project1.sln"));
+                Assert.That(values, HasAny.EndingWith(@"NuGet.Config"));
+                Assert.That(values, HasAny.EndingWith(@"README.md"));
+                Assert.That(values, HasAny.EndingWith(@"docs\.gitkeep"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1\Project1.csproj"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.App\Config\Moryx.Products.Management.ModuleConfig.json"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.App\Config\Moryx.Products.Model.ProductsContext.DbConfig.json"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.App\Config\Moryx.Resources.Model.ResourcesContext.DbConfig.json"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.App\Properties\launchSettings.json"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.App\wwwroot\favicon.ico"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.App\appsettings.Development.json"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.App\appsettings.json"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.App\Project1.App.csproj"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.App\Program.cs"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.App\Startup.cs"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.ControlSystem\Project1.ControlSystem.csproj"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.Orders\Project1.Orders.csproj"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.Orders\Project1ProductAssignment.cs"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.Orders\Project1RecipeAssignment.cs"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.Products\Importer\Project1ImportParameters.cs"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.Products\Importer\Project1ProductImporter.cs"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.Products\Importer\Project1ProductImporterConfig.cs"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.Products\Project1.Products.csproj"));
+                Assert.That(values, HasAny.EndingWith(@"src\Project1.Resources\Project1.Resources.csproj"));
+                Assert.That(values, HasAny.EndingWith(@"src\Tests\Project1.Tests\Project1.Tests.csproj"));
+
+            });
+        }
     }
 
     public class PathConstraint : Constraint
@@ -82,7 +127,7 @@ namespace Moryx.Cli.Tests.CommandTests
             Description = $"At least one item ending with `{path}`";
         }
 
-        public override ConstraintResult ApplyTo<TActual>(TActual actual) 
+        public override ConstraintResult ApplyTo<TActual>(TActual actual)
         {
             var list = actual as IEnumerable<string>;
             if (list == null)

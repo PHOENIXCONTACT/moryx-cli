@@ -11,5 +11,10 @@ namespace Moryx.Cli.Templates.Extensions
             var content = JsonSerializer.Serialize(@this, new JsonSerializerOptions { WriteIndented = true, PropertyNameCaseInsensitive = true });
             File.WriteAllText(filename, content);
         }
+
+        public static Tuple<string, string> SolutionPlaceholder(this TemplateConfiguration @this, string solutionName)
+        {
+            return new Tuple<string, string>(@this.Placeholders.SolutionName, solutionName);
+        }
     }
 }

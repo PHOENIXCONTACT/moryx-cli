@@ -1,6 +1,7 @@
 ﻿using Moryx.Cli.Templates.Extensions;
 using Moryx.Cli.Templates.Models;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 
@@ -28,23 +29,29 @@ namespace Moryx.Cli.Templates
                     ReturnSpecialDirectories = false,
                     RecurseSubdirectories = true
                 });
-          
+
             return files.ToList();
         }
 
         public static List<string> FilterByPattern(this List<string> list, string root, ConfigurationPattern pattern)
         {
-            var trimmed = list.Select(list => list.Replace(root, ""))
-
+            if (!root.EndsWith(Path.DirectorySeparatorChar))
+            {
+                root += Path.DirectorySeparatorChar;
+            }
+            var trimmed = list
+                .Select(list => list.Replace(root, ""))
                 .Where(s => pattern.Files.Any(p => Matches(s, p)))
                 .ToList();
-            return trimmed;
+
+            return trimmed.Select(t => t).ToList();
         }
 
         private static bool Matches(string input, string pattern)
         {
             string separator = $"{Path.DirectorySeparatorChar}";
-            if (separator == "\\") {
+            if (separator == "\\")
+            {
                 separator = "\\\\";
             }
             string regexPattern = "^" + Regex.Escape(pattern)
@@ -101,7 +108,7 @@ namespace Moryx.Cli.Templates
         {
             return list.Except(list.Module()).ToList();
         }
-        
+
         public static List<string> WithoutState(this List<string> list)
         {
             return list.Except(list.StateFile().Concat(list.StateBaseFile())).ToList();
@@ -239,7 +246,7 @@ namespace Moryx.Cli.Templates
             {
                 tasks.Add(ReplaceInFile(file, dict));
             }
-            
+
             Task.WaitAll(tasks.ToArray());
         }
 
@@ -276,6 +283,41 @@ namespace Moryx.Cli.Templates
             return dictionary;
         }
 
+        public static Dictionary<string, string> PrepareFileStructure(Tuple<string, string> solutionName, List<string> fileNames, ConfigurationPattern pattern, string identifier = "")
+        {
+            var patterns = pattern.Replacements
+                .Select(r => new
+                {
+                    r.Key,
+                    Value = r.Value
+                    .Replace("{id}", identifier, ignoreCase: true, CultureInfo.CurrentCulture)
+                    .Replace("{solutionname}", solutionName.Item2, ignoreCase: true, CultureInfo.CurrentCulture)
+                })
+                .ToDictionary(x => x.Key, x => x.Value)
+                ;
+
+            var result = fileNames
+                .Select(f => new
+                {
+                    Key = f,
+                    Value = ReplacePlaceholders(f, patterns)
+                })
+                .ToDictionary(x => x.Key, x => x.Value);
+
+
+            return result;
+        }
+
+        private static string ReplacePlaceholders(string f, Dictionary<string, string> patterns)
+        {
+            var result = "";
+            foreach (var p in patterns)
+            {
+                result = f.Replace(p.Key, p.Value);
+            }
+            return result;
+        }
+
         public static IEnumerable<string> WriteFilesToDisk(Dictionary<ProjectFileInfo, List<string>> dictionary, TemplateSettings settings, Func<string, string> customReplace)
         {
             var result = new List<string>();
@@ -291,6 +333,22 @@ namespace Moryx.Cli.Templates
 
             return result;
         }
+
+        //public static IEnumerable<string> WriteFilesToDisk(Dictionary<string, string> dictionary, TemplateSettings settings, Func<string, string> customReplace)
+        //{
+        //    var result = new List<string>();
+        //    foreach (var pair in dictionary.SelectMany(pair => pair.Value))
+        //    {
+        //        var newFilename = customReplace(pair.Replace(settings.SourceDirectory, settings.TargetDirectory)).Replace(AppPlaceholder, settings.AppName);
+        //        var path = Path.Combine(settings.TargetDirectory, pair);
+
+        //        Directory.CreateDirectory(Path.GetDirectoryName(newFilename) ?? "");
+        //        File.Copy(pair, newFilename, true);
+        //        result.Add(newFilename);
+        //    }
+
+        //    return result;
+        //}
 
         public static string ReplaceProductName(this string str, string productName)
             => str.Replace(ProductPlaceholder, productName);
@@ -353,7 +411,7 @@ namespace Moryx.Cli.Templates
 
         public bool Equals(string? x, string? y)
         {
-            if (x == null || y == null) 
+            if (x == null || y == null)
                 return false;
             return y.Contains(x);
         }

@@ -68,7 +68,7 @@ namespace Moryx.Cli.Commands
         {
             var cleanedResourceNames = Template.GetCleanedResourceNames(settings);
             var projectFilenames = cleanedResourceNames.InitialProjects();
-            var filteredResourceNames = FilteredResourceNames(settings.SourceDirectory, cleanedResourceNames, new());
+            var filteredResourceNames = FilteredFileNames(settings.SourceDirectory, cleanedResourceNames, new());
 
             var dictionary = Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFilenames);
 
@@ -81,7 +81,7 @@ namespace Moryx.Cli.Commands
                 });
         }
 
-        public static List<string> FilteredResourceNames(string root, List<string> resourceNames, TemplateConfiguration templateConfig)
+        public static List<string> FilteredFileNames(string root, List<string> resourceNames, TemplateConfiguration templateConfig)
         {
             return resourceNames
                 .FilterByPattern(root, templateConfig.New)
