@@ -1,6 +1,5 @@
 ﻿using Moryx.Cli.Commands.Options;
 using Moryx.Cli.Templates.Extensions;
-using Moryx.Cli.Templates.Models;
 using System.Diagnostics.CodeAnalysis;
 using Moryx.Cli.Commands.Extensions;
 using Moryx.Cli.Templates;
@@ -36,21 +35,31 @@ namespace Moryx.Cli.Commands
             var settings = config.AsTemplateSettings(dir, solutionName);
             settings.Pull = options.Pull;
 
-            return CommandBase.Exec(settings, (filenames) =>
+            string errorMessage = "";
+            var configuration = TemplateConfigurationFactory.Load(settings.SourceDirectory, error =>
+            {
+                errorMessage = error;
+            });
+            if (configuration == null)
+                return CommandResult.WithError(errorMessage);
+
+            var template = Template.Load(settings, configuration);
+
+            return CommandBase.Exec(template, () =>
             {
                 Directory.CreateDirectory(solutionName);
-                CreateBareSolution(settings, filenames);
+                CreateBareSolution(template);
                 config.Save(dir);
 
                 var results = new List<CommandResult>();
                 if ((options.Steps ?? "").Any())
                 {
-                    results.Add(AddSteps.Exec(settings, options.Steps!.ToCleanList()));
+                    results.Add(AddSteps.Exec(template, options.Steps!.ToCleanList()));
                 }
 
                 if ((options.Products ?? "").Any())
                 {
-                    results.Add(AddProducts.Exec(settings, options.Products!.ToCleanList()));
+                    results.Add(AddProducts.Exec(template, options.Products!.ToCleanList()));
                 }
 
                 if (!options.NoGitInit)
@@ -64,26 +73,13 @@ namespace Moryx.Cli.Commands
             });
         }
 
-        private static void CreateBareSolution(TemplateSettings settings, List<string> fileNames)
+        private static void CreateBareSolution(Template template)
         {
-            var template = TemplateConfigurationFactory.Load(settings.SourceDirectory);
-            if (template == null)
-                return;
+            var patterns = template.ReplaceVariables(template.Configuration.New);
+            var dictionary = template.NewProject();
 
-            var filteredResourceNames = FilteredFileNames(settings.SourceDirectory, fileNames, template);
-
-            var patterns = Template.PreparePatterns(template.SolutionPlaceholder(settings.AppName), template.New);
-            var dictionary = Template.PrepareFileStructure(filteredResourceNames, patterns);
-
-            var files = Template.WriteFilesToDisk(dictionary, settings);
+            var files = template.WriteFilesToDisk(dictionary);
             Template.ReplacePlaceHoldersInsideFiles(files, patterns);
-        }
-
-        public static List<string> FilteredFileNames(string root, List<string> resourceNames, TemplateConfiguration templateConfig)
-        {
-            return resourceNames
-                .FilterByPattern(root, templateConfig.New)
-                ;
         }
 
         private static void InitializeGitRepo(string solutionName, Action<string> onStatus)

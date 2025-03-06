@@ -1,4 +1,4 @@
-﻿using Moryx.Cli.Tests.Extensions;
+﻿using Moryx.Cli.Templates.Extensions;
 
 namespace Moryx.Cli.Tests
 {
@@ -8,6 +8,7 @@ namespace Moryx.Cli.Tests
             => new List<string>()
             {
                 @"C:\<path>\.gitignore",
+                @"C:\<path>\.moryxtpl",
                 @"C:\<path>\Directory.Build.props",
                 @"C:\<path>\Directory.Build.targets",
                 @"C:\<path>\MyApplication.sln",

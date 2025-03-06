@@ -10,7 +10,7 @@ namespace Moryx.Cli.Commands.Components
         {
             if (projectFileName == null)
                 return;
-            var solutionFileName = Path.Combine($"{settings.AppName}.sln");
+            var solutionFileName = Path.Combine(settings.TargetDirectory, $"{settings.AppName}.sln");
 
 
             // It'd be prefered to utilize Roslyn to add the project to the

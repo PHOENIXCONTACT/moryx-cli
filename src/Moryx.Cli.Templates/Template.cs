@@ -1,14 +1,14 @@
 ﻿using Moryx.Cli.Templates.Extensions;
 using Moryx.Cli.Templates.Models;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
 
 namespace Moryx.Cli.Templates
 {
-    public static class Template
+    public class Template
     {
+        private List<string> _fileNames;
         public const string AppPlaceholder = "MyApplication";
         public const string ProductPlaceholder = "MyProduct";
         public const string ModulePlaceholder = "MyModule";
@@ -18,6 +18,38 @@ namespace Moryx.Cli.Templates
         public const string StatePlaceholder = "SpecificState";
         public const string ResourcePlaceholder = "SomeResource";
         public const string ResourcePlaceholder2 = "MyResource";
+        private const string ResourceKey = "{resource}";
+        private const string TemplateFileExtension = ".moryxtpl";
+        private TemplateSettings _settings;
+        private TemplateConfiguration _configuration;
+
+        public TemplateSettings Settings { get { return _settings; } }
+        public TemplateConfiguration Configuration { get { return _configuration; } }
+        public List<string> FileNames { get { return _fileNames; } }
+
+        public string AppName { get { return _settings.AppName; } }
+
+        private Template(TemplateSettings settings, TemplateConfiguration configuration, List<string> files)
+        {
+            _settings = settings;
+            _configuration = configuration;
+            _fileNames = files;
+        }
+
+        public static Template Load(TemplateSettings settings, TemplateConfiguration configuration)
+        {
+            return new Template(
+                settings,
+                configuration,
+                GetCleanedResourceNames(settings)
+            );
+        }
+
+        public static Template Load(TemplateSettings settings, TemplateConfiguration configuration, List<string> files)
+        {
+            var template = new Template(settings, configuration, files);
+            return template;
+        }
 
         public static List<string> GetCleanedResourceNames(TemplateSettings settings)
         {
@@ -33,18 +65,18 @@ namespace Moryx.Cli.Templates
             return files.ToList();
         }
 
-        public static List<string> FilterByPattern(this List<string> list, string root, ConfigurationPattern pattern)
+        public List<string> FilterByPattern(string root, ConfigurationPattern pattern)
         {
             if (!root.EndsWith(Path.DirectorySeparatorChar))
             {
                 root += Path.DirectorySeparatorChar;
             }
-            var trimmed = list
-                .Select(list => list.Replace(root, ""))
-                .Where(s => pattern.Files.Any(p => Matches(s, p)))
+            var trimmed = _fileNames
+                .Select(list => list.TrimStart(root))
+                .Where(s => pattern.Files.Any(p => Matches(s, p)) && !s.EndsWith(TemplateFileExtension))
                 .ToList();
 
-            return trimmed.Select(t => t).ToList();
+            return trimmed;
         }
 
         private static bool Matches(string input, string pattern)
@@ -55,189 +87,50 @@ namespace Moryx.Cli.Templates
                 separator = "\\\\";
             }
             string regexPattern = "^" + Regex.Escape(pattern)
-                .Replace(@$"\*\*/{separator}", $"(.*{separator})?")
+                .Replace(@$"\*\*{separator}", $"(.*{separator})?")
                 .Replace(@"\*", @$"[^{separator}]*")
                 .Replace(@"\?", @$"[^{separator}]") + "$";
             return Regex.IsMatch(input, regexPattern, RegexOptions.IgnoreCase);
         }
 
-        public static List<string> BareProjectFiles(this List<string> list)
+        public Dictionary<string, string> NewProject()
+            => FilteredFileStructure(_configuration.New);
+
+        private Dictionary<string, string> FilteredFileStructure(ConfigurationPattern pattern, string identifier = "")
         {
-            var keep = list.ResourcesProject();
-            var shrinked = list
-                .WithoutStep()
-                .WithoutProduct()
-                .WithoutRecipe()
-                .WithoutSetupTrigger()
-                .WithoutCellSelector()
-                .WithoutModule()
-                .WithoutResource()
-                .WithoutState()
-                ;
-
-            shrinked.AddRange(keep);
-            return shrinked;
-        }
-
-        public static List<string> WithoutProduct(this List<string> list)
-        {
-            return list.Except(list.Product()).ToList();
-        }
-
-        public static List<string> WithoutStep(this List<string> list)
-        {
-            return list.Except(list.Step()).ToList();
-        }
-
-        public static List<string> WithoutRecipe(this List<string> list)
-        {
-            return list.Except(list.Recipe()).ToList();
-        }
-
-        public static List<string> WithoutSetupTrigger(this List<string> list)
-        {
-            return list.Except(list.SetupTrigger()).ToList();
-        }
-
-        public static List<string> WithoutCellSelector(this List<string> list)
-        {
-            return list.Except(list.CellSelector()).ToList();
-        }
-
-        public static List<string> WithoutModule(this List<string> list)
-        {
-            return list.Except(list.Module()).ToList();
-        }
-
-        public static List<string> WithoutState(this List<string> list)
-        {
-            return list.Except(list.StateFile().Concat(list.StateBaseFile())).ToList();
-        }
-
-        public static List<string> WithoutResource(this List<string> list)
-        {
-            return list.Except(list.Resource()).ToList();
-        }
-
-
-        public static List<string> Product(this List<string> list)
-        {
-            var whitelist = new List<string>(){
-                "MyProductInstance.cs",
-                "MyProductType.cs"
-            };
-            return list
-                .Intersect(whitelist, new ListComparer())
-                .ToList();
-        }
-
-        public static List<string> StateBaseFile(this List<string> list)
-            => list.Intersect("StateBase.cs");
-
-        public static List<string> StateFile(this List<string> list)
-            => list.Intersect("State.cs");
-
-        public static List<string> Step(this List<string> list)
-        {
-            var whitelist = list
-                .Where(e => e.Contains("Some"))
-                .ToList();
-            whitelist.Add("SimulatedInOutDriver.cs");
-            whitelist.Add("MyApplication.Resources.csproj");
-
-            return list
-                .Intersect(whitelist, new ListComparer())
-                .ToList();
-        }
-
-        public static List<string> ResourcesProject(this List<string> list)
-        {
-            var whitelist = new List<string>
+            pattern = new ConfigurationPattern
             {
-                "MyApplication.Resources.csproj"
+                Files = pattern.Files.Select(f => f.OsAware()).ToList(),
+                Replacements = pattern.Replacements,
             };
-
-            return list
-                .Intersect(whitelist, new ListComparer())
-                .ToList();
+            var fileNames = FilterByPattern(_settings.SourceDirectory, pattern);
+            return PrepareFileStructure(fileNames, pattern, identifier);
         }
 
-        public static List<string> Module(this List<string> list)
+        private Dictionary<string, string> FilteredFileStructure(ConfigurationPattern pattern, string identifier, Dictionary<string, string> placeholders)
         {
-            var whitelist = list
-                .Where(e => e.Contains("MyModule"))
-                .ToList();
-
-            return list
-                .Intersect(whitelist, new ListComparer())
-                .ToList();
+            var fileNames = FilterByPattern(_settings.SourceDirectory, pattern);
+            return PrepareFileStructure(fileNames, pattern, identifier, placeholders);
         }
 
-        public static List<ProjectFileInfo> InitialProjects(this List<string> list)
-        {
-            return list
-                .Where(s => s.EndsWith(".csproj"))
-                .Select(s => ExtractProjectInfo(s))
-                .Where(s => s != null)
-                .Select(f => new ProjectFileInfo
-                {
-                    Name = f!.Name,
-                    Filename = f.Filename,
-                    Extension = f.Extension,
-                })
-                .ToList();
-        }
+        public Dictionary<string, string> Product(string name)
+            => FilteredFileStructure(_configuration.Add.Product, name);
+        
+        public Dictionary<string, string> StateBaseFile(string resourceName)
+            => FilteredFileStructure(_configuration.Add.StateBase, "", new() { { ResourceKey, resourceName } });
 
-        public static List<string> Recipe(this List<string> list)
-        {
-            var whitelist = new List<string>(){
-                "MyApplicationRecipe.cs",
-            };
-            return list
-                .Intersect(whitelist, new ListComparer())
-                .ToList();
-        }
+        public Dictionary<string, string> StateFile(string name, string resourceName)
+            => FilteredFileStructure(_configuration.Add.State, name, new() { { ResourceKey, resourceName } });
 
-        public static List<string> Resource(this List<string> list)
-        {
-            var whitelist = list
-                .Where(e => e.Contains("ISomeResource") || e.Contains("MyResource"))
-                .ToList();
+        public Dictionary<string, string> Step(string name)
+            => FilteredFileStructure(_configuration.Add.Step, name);
 
-            return list
-                .Intersect(whitelist, new ListComparer())
-                .ToList();
-        }
+        public Dictionary<string, string> Module(string name)
+            => FilteredFileStructure(_configuration.Add.Module, name);
 
-        public static List<string> SetupTrigger(this List<string> list)
-        {
-            var whitelist = new List<string>(){
-                "MySetupTrigger.cs",
-                "MySetupTriggerConfig.cs",
-            };
-            return list
-                .Intersect(whitelist, new ListComparer())
-                .ToList();
-        }
+        public Dictionary<string, string> Resource(string identifier)
+            => FilteredFileStructure(_configuration.Add.Resource, identifier);
 
-        public static List<string> CellSelector(this List<string> list)
-        {
-            var whitelist = new List<string>(){
-                "MyCellSelector.cs",
-                "MyCellSelectorConfig.cs",
-            };
-            return list
-                .Intersect(whitelist, new ListComparer())
-                .ToList();
-        }
-
-        private static ProjectFileInfo ExtractProjectInfo(string str)
-            => new ProjectFileInfo
-            {
-                Name = Path.GetFileNameWithoutExtension(str),
-                Filename = str,
-                Extension = Path.GetExtension(str),
-            };
 
         public static void ReplacePlaceHoldersInsideFiles(IEnumerable<string> filenames, Dictionary<string, string> dict)
         {
@@ -260,30 +153,13 @@ namespace Moryx.Cli.Templates
             await File.WriteAllTextAsync(file, text);
         }
 
-        public static Dictionary<ProjectFileInfo, List<string>> PrepareFileStructure(string solution, List<string> cleanedResourceNames, List<ProjectFileInfo> projectFilenames)
+        public Dictionary<string, string> PrepareFileStructure(List<string> fileNames, ConfigurationPattern pattern, string identifier = "", Dictionary<string, string> placeholders = null)
         {
-            var dictionary = new Dictionary<ProjectFileInfo, List<string>>();
-
-            // Reverse list to avoid problems with similar project names
-            // e.g. Moryx.App vs Moryx.App.Plus
-            var reverseFilenames = projectFilenames
-                .OrderByDescending(x => x.Name)
-                .ToList();
-            foreach (var project in reverseFilenames)
-            {
-                var projectRelatedFiles = cleanedResourceNames
-                    .Where(f => f.Contains(project.Name) && !f.EndsWith(".sln"))
-                    .ToList();
-                cleanedResourceNames = cleanedResourceNames
-                    .Except(projectRelatedFiles)
-                    .ToList();
-                dictionary.Add(project, projectRelatedFiles);
-            }
-            dictionary.Add(new ProjectFileInfo { Extension = "", Filename = "", Name = "" }, cleanedResourceNames);
-            return dictionary;
+            var patterns = ReplaceVariables(pattern, identifier, placeholders);
+            return PrepareFileStructure(fileNames, patterns);
         }
 
-        public static Dictionary<string, string> PrepareFileStructure(List<string> fileNames, Dictionary<string, string> patterns)
+        public Dictionary<string, string> PrepareFileStructure(List<string> fileNames, Dictionary<string, string> patterns)
             => fileNames
                 .Select(f => new
                 {
@@ -292,51 +168,56 @@ namespace Moryx.Cli.Templates
                 })
                 .ToDictionary(x => x.Key, x => x.Value);
 
-        public static Dictionary<string, string> PreparePatterns(Tuple<string, string> solutionName, ConfigurationPattern pattern, string identifier = "")
-            => pattern.Replacements
+        public Dictionary<string, string> ReplaceVariables(ConfigurationPattern pattern, string identifier = "", Dictionary<string, string>? variables = null)
+        {
+            var replacements = pattern.Replacements;
+            foreach(var replacement in _configuration.New.Replacements)
+            {
+                replacements.TryAdd(replacement.Key, replacement.Value);
+            }
+
+            variables = variables ?? [];
+            variables.TryAdd("{id}", identifier);
+            variables.TryAdd("{solutionname}", _settings.AppName);
+
+            return replacements
                 .Select(r => new
                 {
                     r.Key,
-                    Value = r.Value
-                    .Replace("{id}", identifier, ignoreCase: true, CultureInfo.CurrentCulture)
-                    .Replace("{solutionname}", solutionName.Item2, ignoreCase: true, CultureInfo.CurrentCulture)
+                    Value = ApplyVariables(r.Value, variables)
                 })
                 .ToDictionary(x => x.Key, x => x.Value)
                 ;
+        }
+
+        public static string ApplyVariables(string str, Dictionary<string, string> placeholders, int index = 0)
+        {
+            if (index >= placeholders.Count)
+                return str;
+
+            var placeholder = placeholders.ElementAt(index);
+            str = str.Replace(placeholder.Key, placeholder.Value, ignoreCase: true, CultureInfo.CurrentCulture);
+
+            return ApplyVariables(str, placeholders, index + 1);
+        }
 
         private static string ReplacePlaceholders(string f, Dictionary<string, string> patterns)
         {
-            var result = "";
+            var result = f;
             foreach (var p in patterns)
             {
-                result = f.Replace(p.Key, p.Value);
+                result = result.Replace(p.Key, p.Value);
             }
             return result;
         }
 
-        public static IEnumerable<string> WriteFilesToDisk(Dictionary<ProjectFileInfo, List<string>> dictionary, TemplateSettings settings, Func<string, string> customReplace)
-        {
-            var result = new List<string>();
-            foreach (var pair in dictionary.SelectMany(pair => pair.Value))
-            {
-                var newFilename = customReplace(pair.Replace(settings.SourceDirectory, settings.TargetDirectory)).Replace(AppPlaceholder, settings.AppName);
-                var path = Path.Combine(settings.TargetDirectory, pair);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(newFilename) ?? "");
-                File.Copy(pair, newFilename, true);
-                result.Add(newFilename);
-            }
-
-            return result;
-        }
-
-        public static IEnumerable<string> WriteFilesToDisk(Dictionary<string, string> dictionary, TemplateSettings settings, bool force = false)
+        public IEnumerable<string> WriteFilesToDisk(Dictionary<string, string> dictionary, bool force = false)
         {
             var result = new List<string>();
             foreach (var pair in dictionary)
             {
-                var from = Path.Combine(settings.SourceDirectory, pair.Key);
-                var to = Path.Combine(settings.TargetDirectory, pair.Value);
+                var from = Path.Combine(_settings.SourceDirectory, pair.Key);
+                var to = Path.Combine(_settings.TargetDirectory, pair.Value);
 
                 Directory.CreateDirectory(Path.GetDirectoryName(to) ?? "");
                 File.Copy(from, to, force);
@@ -344,77 +225,6 @@ namespace Moryx.Cli.Templates
             }
 
             return result;
-        }
-
-        public static string ReplaceProductName(this string str, string productName)
-            => str.Replace(ProductPlaceholder, productName);
-
-        public static string ReplaceStepName(this string str, string stepName)
-            => str.Replace(ResourcePlaceholder, stepName);
-
-        public static string GetSolutionName(string dir, Action<string> onError)
-        {
-            var files = Directory.GetFiles(dir, "*.sln");
-            if (files != null)
-            {
-                if (files.Length == 1)
-                {
-                    return Path.GetFileNameWithoutExtension(files[0]);
-                }
-                if (files.Length > 1)
-                {
-                    onError("Too many `.sln` found. Please make sure, there is only one solution.");
-                    return "";
-                }
-            }
-            onError("No `.sln` found. Please make sure, there is a VisualStudio solution in this directory.");
-            return "";
-        }
-
-        public static void AssertSolution(string dir, Action<string> then, Action<string> onError)
-        {
-            var solutionName = GetSolutionName(dir, onError);
-            if (!string.IsNullOrEmpty(solutionName))
-            {
-                then(solutionName);
-            }
-        }
-    }
-
-    public class ProjectFileInfo
-    {
-        public required string Name { get; set; }
-        public required string Filename { get; set; }
-        public required string Extension { get; set; }
-
-
-        public override bool Equals(object? obj)
-        {
-            return obj is ProjectFileInfo other &&
-                   Name == other.Name &&
-                   Filename == other.Filename;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name, Filename);
-        }
-    }
-
-
-    internal class ListComparer : IEqualityComparer<string>
-    {
-
-        public bool Equals(string? x, string? y)
-        {
-            if (x == null || y == null)
-                return false;
-            return y.Contains(x);
-        }
-
-        public int GetHashCode([DisallowNull] string obj)
-        {
-            return 0;
         }
     }
 }

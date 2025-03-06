@@ -6,14 +6,14 @@ namespace Moryx.Cli.Commands
 {
     public static class AddResources
     {
-        public static CommandResult Exec(TemplateSettings settings, IEnumerable<string> resources)
+        public static CommandResult Exec(Template template, IEnumerable<string> resources)
         {
-            return CommandBase.Exec(settings, (filenames)
+            return CommandBase.Exec(template, ()
                 => resources.Select(resource =>
                 {
                     var addConfig = new AddConfig
                     {
-                        SolutionName = settings.AppName,
+                        SolutionName = template.AppName,
                         ThingName = $"{resource}Resource",
                         Thing = "resource",
                         ThingPlaceholders =
@@ -23,9 +23,9 @@ namespace Moryx.Cli.Commands
                         ],
                     };
                     return AddThing.Exec(
-                        settings,
+                        template,
                         addConfig,
-                        filenames.Resource()
+                        template.Resource(resource)
                     );
                 })
                 .ToArray()

@@ -9,11 +9,6 @@
         public string Version { get; set; } = "";
 
         /// <summary>
-        /// Template wide placeholders
-        /// </summary>
-        public GlobalPlaceholders Placeholders { get; set; } = new();
-
-        /// <summary>
         /// <see cref="NewConfiguration">
         /// </summary>
         public NewConfiguration New { get; set; } = new();
@@ -60,9 +55,40 @@
     {
     }
 
+    /// <summary>
+    /// Configuration patterns for defined types of 
+    /// entities
+    /// </summary>
     public class AddConfigurations
     {
+        /// <summary>
+        /// Used to add Products
+        /// </summary>
         public AddConfiguration Product { get; set; } = new();
+
+        /// <summary>
+        /// Used to add Resources
+        /// </summary>
         public AddConfiguration Resource { get; set; } = new();
+
+        /// <summary>
+        /// Used to add Steps
+        /// </summary>
+        public AddConfiguration Step { get; set; } = new();
+
+        /// <summary>
+        /// Used to add Modules
+        /// </summary>
+        public AddConfiguration Module { get; set; } = new();
+
+        /// <summary>
+        /// Used to add state machine States
+        /// </summary>
+        public AddConfiguration State { get; set; } = new();
+
+        /// <summary>
+        /// Used to add or update a state machine's StateBase
+        /// </summary>
+        public AddConfiguration StateBase { get; set; } = new();
     }
 }

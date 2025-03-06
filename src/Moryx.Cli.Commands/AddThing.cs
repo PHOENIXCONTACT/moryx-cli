@@ -12,29 +12,21 @@ namespace Moryx.Cli.Commands
         /// Retrieves files of a certain category from the template and moves them as defined 
         /// in <paramref name="filenames"/> to the current project.
         /// </summary>
-        /// <param name="settings"></param>
+        /// <param name="template"></param>
         /// <param name="config"></param>
         /// <param name="resourceNames"></param>
         /// <param name="onAddedFiles"></param>
         /// <returns></returns>
-        public static CommandResult Exec(TemplateSettings settings, AddConfig config, List<string> resourceNames, Action<IEnumerable<string>>? onAddedFiles = null, StringReplacements? replacements = null)
+        public static CommandResult Exec(Template template, AddConfig config, Dictionary<string, string> fileStructure, Action<IEnumerable<string>>? onAddedFiles = null, StringReplacements? replacements = null)
         {
-            return CommandBase.Exec(settings, (filenames) =>
+            return CommandBase.Exec(template, () =>
             {
-                var projectFilenames = filenames.InitialProjects();
-
                 try
                 {
-                    if(replacements == null)
-                    {
-                        replacements = new StringReplacements(config);
-                    }
-                    var dictionary = Template.PrepareFileStructure(config.SolutionName, resourceNames, projectFilenames);
+                    replacements ??= new StringReplacements(config);
 
-                    var files = Template.WriteFilesToDisk(
-                        dictionary,
-                        settings,
-                        s => s.Replace(replacements.FileNamePatterns)
+                    var files = template.WriteFilesToDisk(
+                        fileStructure
                     );
 
                     Template.ReplacePlaceHoldersInsideFiles(

@@ -14,16 +14,6 @@ namespace Moryx.Cli.Templates.Extensions
                 .ToList();
         }
 
-        public static string ReplaceFileExtension(this string str, string oldStr, string newStr)
-        {
-            var position = str.LastIndexOf(oldStr);
-            if (position == -1)
-            {
-                return str;
-            }
-            return str.Remove(position).Insert(position, newStr);
-        }
-
         public static string StateBase(this string str) => str + "StateBase";
 
         public static string AsFolderName(this string url)
@@ -41,6 +31,17 @@ namespace Moryx.Cli.Templates.Extensions
                 }
             }
             return result.ToString();
+        }
+
+        public static string TrimStart(this string @this, string trim)
+        {
+            if(string.IsNullOrEmpty(trim))
+                return @this;
+
+            if(@this.StartsWith(trim))
+                return @this[trim.Length..];
+
+            return @this;
         }
     }
 }
