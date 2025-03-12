@@ -35,6 +35,29 @@ namespace Moryx.Cli.CommandLine
                     add.SetDescription("Adds certain subjects to the project. See `moryx add --help` for more details.");
                 })
                     .WithAlias("a");
+
+                config.AddBranch<CommandSettings>("remotes", remotes =>
+                {
+                    remotes.SetDescription("Manages remote profiles");
+                    remotes.SetDefaultCommand<RemotesList>();
+                    remotes.AddCommand<RemotesAdd>("add")
+                        .WithExample(["remotes", "add", "custom", "https://example.com/repo.git", "main"])
+                        ;
+                    //remotes.AddCommand<RemotesList>("list")
+                    //    .WithExample(["remotes", "list"])
+                    //   ;
+                    remotes.AddCommand<RemotesRemove>("remove")
+                        .WithExample(["remotes", "remove", "custom"])
+                        ;
+                    remotes.AddCommand<RemotesUse>("use")
+                        .WithExample(["remotes", "use", "custom"])
+                        ;
+                });
+
+                config.AddCommand<Pull>("pull")
+                        .WithExample(["pull", "<REMOTE>"])
+                        ;
+
                 config.AddCommand<Exec>("exec")
                     .WithExample(new[] { "exec", "<COMMAND>", "--endpoint", "<ENDPOINT>" })
                     .IsHidden();

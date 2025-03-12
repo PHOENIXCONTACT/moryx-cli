@@ -72,3 +72,29 @@ This is rather a workaround.
 ### Examples
 
     moryx exec create-dbs
+
+
+## Remotes
+
+The CLI uses Git repositories as templates in order to create new application 
+projects or add any kind of features to it. 
+
+By default, this repository is `https://github.com/PHOENIXCONTACT/MORYX-Template/tree/machine`
+if nothing else is provided to the `moryx new` command.
+
+To change or switch later, from where to retrieve templates, `remotes` were
+introduced to manage template sources within a project.
+
+### Usage
+
+    moryx remotes add <NAME> <URL> <BRANCH>    Adds a Git remote to the local config
+    moryx remotes remove <NAME>                Removes Git remotes
+    moryx remotes use <NAME>                   Uses the given remote by default
+
+### Examples 
+
+    moryx remotes
+    moryx remotes add custom https://example.com/repo.git main
+    moryx remotes remove custom
+    moryx remotes use custom
+

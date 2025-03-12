@@ -293,6 +293,15 @@ namespace Moryx.Cli.Templates
             onError("No `.sln` found. Please make sure, there is a VisualStudio solution in this directory.");
             return "";
         }
+
+        public static void AssertSolution(string dir, Action<string> then, Action<string> onError)
+        {
+            var solutionName = GetSolutionName(dir, onError);
+            if (!string.IsNullOrEmpty(solutionName))
+            {
+                then(solutionName);
+            }
+        }
     }
 
     public class ProjectFileInfo

@@ -1,4 +1,6 @@
-﻿namespace Moryx.Cli.Templates.Models
+﻿using Moryx.Cli.Templates.Extensions;
+
+namespace Moryx.Cli.Templates.Models
 {
     public class TemplateSettings
     {
@@ -8,7 +10,7 @@
         public required string AppName { get; set; }
         public string ProfileName { get; set; } = "default";
         public required string TargetDirectory { get; set; }
-        public string SourceDirectory { get => Path.Combine(TemplatesRoot(), ProfileName, Branch); }
+        public string SourceDirectory { get => Path.Combine(TemplatesRoot(), Repository.AsFolderName(), Branch); }
 
 
         public string TemplatesRoot()
