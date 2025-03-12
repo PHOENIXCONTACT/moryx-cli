@@ -145,9 +145,9 @@ namespace Moryx.Cli.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(keys[0], Does.EndWith("ISomeResource.cs"));
-                Assert.That(keys[1], Does.EndWith(Path.DirectorySeparatorChar + "MyResource.cs"));
-                Assert.That(keys[2], Does.EndWith("MyResourceTest.cs"));
+                Assert.That(keys[0], Does.EndWith("ISomeResource.cs".OsAware()));
+                Assert.That(keys[1], Does.EndWith(@"\MyResource.cs".OsAware()));
+                Assert.That(keys[2], Does.EndWith("MyResourceTest.cs".OsAware()));
             });
 
             var values = dictionary
@@ -155,9 +155,9 @@ namespace Moryx.Cli.Tests
                 .ToList();
             Assert.Multiple(() =>
             {
-                Assert.That(values[0], Does.EndWith(@"PencilFactory\Resources\ICameraResource.cs"));
-                Assert.That(values[1], Does.EndWith(Path.DirectorySeparatorChar + "CameraResource.cs"));
-                Assert.That(values[2], Does.EndWith("CameraResourceTest.cs"));
+                Assert.That(values[0], Does.EndWith(@"PencilFactory\Resources\ICameraResource.cs".OsAware()));
+                Assert.That(values[1], Does.EndWith(@"\CameraResource.cs".OsAware()));
+                Assert.That(values[2], Does.EndWith("CameraResourceTest.cs".OsAware()));
             });
         }
 
@@ -172,7 +172,7 @@ namespace Moryx.Cli.Tests
                 .ToList();
 
             Assert.That(list, Has.Count.EqualTo(1));
-            Assert.That(list[0], Is.EqualTo(@"src\MyApplication.Resources\SpecificState.cs"));
+            Assert.That(list[0], Is.EqualTo(@"src\MyApplication.Resources\SpecificState.cs".OsAware()));
         }
 
         [Test]
@@ -186,7 +186,7 @@ namespace Moryx.Cli.Tests
                 .ToList();
 
             Assert.That(list, Has.Count.EqualTo(1));
-            Assert.That(list[0], Is.EqualTo(@"src\MyApplication.Resources\StateBase.cs"));
+            Assert.That(list[0], Is.EqualTo(@"src\MyApplication.Resources\StateBase.cs".OsAware()));
         }
     }
 }

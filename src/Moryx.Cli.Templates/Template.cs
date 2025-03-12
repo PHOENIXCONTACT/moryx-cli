@@ -96,19 +96,13 @@ namespace Moryx.Cli.Templates
         public Dictionary<string, string> NewProject()
             => FilteredFileStructure(_configuration.New);
 
-        private Dictionary<string, string> FilteredFileStructure(ConfigurationPattern pattern, string identifier = "")
+        private Dictionary<string, string> FilteredFileStructure(ConfigurationPattern pattern, string identifier = "", Dictionary<string, string> placeholders = null)
         {
             pattern = new ConfigurationPattern
             {
                 Files = pattern.Files.Select(f => f.OsAware()).ToList(),
                 Replacements = pattern.Replacements,
             };
-            var fileNames = FilterByPattern(_settings.SourceDirectory, pattern);
-            return PrepareFileStructure(fileNames, pattern, identifier);
-        }
-
-        private Dictionary<string, string> FilteredFileStructure(ConfigurationPattern pattern, string identifier, Dictionary<string, string> placeholders)
-        {
             var fileNames = FilterByPattern(_settings.SourceDirectory, pattern);
             return PrepareFileStructure(fileNames, pattern, identifier, placeholders);
         }

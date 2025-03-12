@@ -43,9 +43,6 @@ namespace Moryx.Cli.CommandLine
                     remotes.AddCommand<RemotesAdd>("add")
                         .WithExample(["remotes", "add", "custom", "https://example.com/repo.git", "main"])
                         ;
-                    //remotes.AddCommand<RemotesList>("list")
-                    //    .WithExample(["remotes", "list"])
-                    //   ;
                     remotes.AddCommand<RemotesRemove>("remove")
                         .WithExample(["remotes", "remove", "custom"])
                         ;

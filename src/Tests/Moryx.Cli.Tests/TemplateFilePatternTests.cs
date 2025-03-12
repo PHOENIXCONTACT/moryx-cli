@@ -9,14 +9,13 @@ namespace Moryx.Cli.Tests
     {
         private const int NumberOfAllFiles = 17;
 
-        private const string Root = @"C:\root";
-        private List<string> _files = [];
-        private TemplateConfiguration _templateConfiguration = new();
+        private string Root = @"C:\root";
         private Template _template;
 
         [SetUp]
         public void Setup()
         {
+            Root = Root.OsAware();
             var fileNames = new List<string>()
             {
                 @"C:\root\.gitignore",
@@ -37,11 +36,11 @@ namespace Moryx.Cli.Tests
                 @"C:\root\src\Tests\Test3.txt",
                 @"C:\root\src\Tests\Test30.txt",
             }
-            .Select(s => s.Replace('\\', Path.DirectorySeparatorChar))
+            .Select(s => s.OsAware())
             .ToList();
 
             var settingsMock = new Mock<TemplateSettings>();
-            settingsMock.SetupGet(m => m.SourceDirectory).Returns(Root);
+            settingsMock.SetupGet(m => m.SourceDirectory).Returns(Root.OsAware());
             settingsMock.Object.AppName = "PencilFactory";
             var templateConfiguration = TemplateConfigurationFactory.Default();
 
@@ -52,7 +51,7 @@ namespace Moryx.Cli.Tests
         [Test]
         public void TestThatSingleStarMatchesTheFilesAtRoot()
         {
-            var list = _template.FilterByPattern(Root, TextPattern("*"));
+            var list = _template.FilterByPattern(Root, TextPattern("*".OsAware()));
 
             Assert.That(list, Has.Count.EqualTo(3));
             Assert.Multiple(() =>
@@ -66,7 +65,7 @@ namespace Moryx.Cli.Tests
         [Test]
         public void TestThatSingleStarWithFilenameMatchesFileAtRoot()
         {
-            var list = _template.FilterByPattern(Root, TextPattern("*.gitignore"));
+            var list = _template.FilterByPattern(Root, TextPattern("*.gitignore".OsAware()));
 
             Assert.That(list, Has.Count.EqualTo(1));
             Assert.Multiple(() =>
@@ -78,7 +77,7 @@ namespace Moryx.Cli.Tests
         [Test]
         public void TestThatDoubleStarsCanMatchAllFiles()
         {
-            var list = _template.FilterByPattern(Root, TextPattern(@"**\*")); 
+            var list = _template.FilterByPattern(Root, TextPattern(@"**\*".OsAware())); 
 
             Assert.That(list, Has.Count.EqualTo(NumberOfAllFiles));
         }
@@ -86,7 +85,7 @@ namespace Moryx.Cli.Tests
         [Test]
         public void TestThatDoubleStarsMatchesSubfolder()
         {
-            var list = _template.FilterByPattern(Root, TextPattern(@"**\*Module*\**\*"));
+            var list = _template.FilterByPattern(Root, TextPattern(@"**\*Module*\**\*".OsAware()));
 
             Assert.That(list, Has.Count.EqualTo(3));
             Assert.Multiple(() =>
@@ -100,7 +99,7 @@ namespace Moryx.Cli.Tests
         [Test]
         public void TestThatDoubleStarsWillBeInterruptedByTextPattern()
         {
-            var list = _template.FilterByPattern(Root, TextPattern(@"**\*Module*\*"));
+            var list = _template.FilterByPattern(Root, TextPattern(@"**\*Module*\*".OsAware()));
 
             // `**\*Module*\*` would only math those paths, where `*Module*`
             // matches the deepest subfolder, but not where `*Module*` matches
@@ -117,7 +116,7 @@ namespace Moryx.Cli.Tests
         [Test]
         public void TestThatDoubleStarsWithTextMatchesSubfolder()
         {
-            var list = _template.FilterByPattern(Root, TextPattern(@"**\*App\*"));
+            var list = _template.FilterByPattern(Root, TextPattern(@"**\*App\*".OsAware()));
 
             Assert.That(list, Has.Count.EqualTo(5));
             Assert.Multiple(() =>
@@ -132,7 +131,7 @@ namespace Moryx.Cli.Tests
 
         public void TestThatDoubleStarsWithTextAndMultiplePlaceholdersMatchesSubfolder()
         {
-            var list = _template.FilterByPattern(Root, TextPattern(@"**\*App*\*"));
+            var list = _template.FilterByPattern(Root, TextPattern(@"**\*App*\*".OsAware()));
 
             Assert.That(list, Has.Count.EqualTo(5));
             Assert.Multiple(() =>
@@ -148,7 +147,7 @@ namespace Moryx.Cli.Tests
         [Test]
         public void TestThatNoFollowingSeparatorWontReturnFolders()
         {
-            var list = _template.FilterByPattern(Root, TextPattern(@"**\*Application*"));
+            var list = _template.FilterByPattern(Root, TextPattern(@"**\*Application*".OsAware()));
 
             // In the following hierarchy, the pattern `**\*Application*` would
             // only return the file entry `MyApplication.App.csproj`, even though
@@ -163,14 +162,18 @@ namespace Moryx.Cli.Tests
             Assert.That(list, Has.Count.EqualTo(1));
             Assert.Multiple(() =>
             {
-                Assert.That(list, Does.Contain(@"src\MyApplication.App\MyApplication.App.csproj"));
+                Assert.That(list, Does.Contain(@"src\MyApplication.App\MyApplication.App.csproj".OsAware()));
             });
         }
 
         [Test]
         public void TestThatOverlappingPatternsWontReturnDuplicates()
         {
-            var list = _template.FilterByPattern(Root, TextPattern([@"**\*App\*", @"**\*Application*"]));
+            var list = _template.FilterByPattern(Root, TextPattern(
+                [
+                    @"**\*App\*".OsAware(), 
+                    @"**\*Application*".OsAware()
+                ]));
 
             Assert.That(list, Has.Count.EqualTo(5));
             Assert.Multiple(() =>
@@ -186,7 +189,7 @@ namespace Moryx.Cli.Tests
         [Test]
         public void TestSingleQuestionMark()
         {
-            var list = _template.FilterByPattern(Root, TextPattern(@"src\Tests\Test?.txt"));
+            var list = _template.FilterByPattern(Root, TextPattern(@"src\Tests\Test?.txt".OsAware()));
 
             Assert.That(list, Has.Count.EqualTo(3));
             Assert.Multiple(() =>
@@ -200,7 +203,7 @@ namespace Moryx.Cli.Tests
         [Test]
         public void TestSingleDigit()
         {
-            var list = _template.FilterByPattern(Root, TextPattern(@"**\*1*"));
+            var list = _template.FilterByPattern(Root, TextPattern(@"**\*1*".OsAware()));
 
             Assert.That(list, Has.Count.EqualTo(2));
             Assert.Multiple(() =>
@@ -213,7 +216,7 @@ namespace Moryx.Cli.Tests
         [Test]
         public void TestDoubleQuestionMark()
         {
-            var list = _template.FilterByPattern(Root, TextPattern(@"src\Tests\Test??.txt"));
+            var list = _template.FilterByPattern(Root, TextPattern(@"src\Tests\Test??.txt".OsAware()));
 
             Assert.That(list, Has.Count.EqualTo(3));
             Assert.Multiple(() =>
