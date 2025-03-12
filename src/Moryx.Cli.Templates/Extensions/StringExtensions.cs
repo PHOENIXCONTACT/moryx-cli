@@ -26,7 +26,7 @@ namespace Moryx.Cli.Templates.Extensions
 
         public static string StateBase(this string str) => str + "StateBase";
 
-        public static string FileSystemCompatible(this string url)
+        public static string AsFolderName(this string url)
         {
             var pattern = @"[\:\/\?\#\[\]\!\$\&\'\(\)\*\+\,\;\=]";
             url = Regex.Replace(url, pattern, "_");

@@ -87,9 +87,9 @@ introduced to manage template sources within a project.
 
 ### Usage
 
-    add <NAME> <URL> <BRANCH>    Adds a Git remote to the local config
-    remove <NAME>                Removes Git remotes
-    use <NAME>                   Uses the given remote by default
+    moryx remotes add <NAME> <URL> <BRANCH>    Adds a Git remote to the local config
+    moryx remotes remove <NAME>                Removes Git remotes
+    moryx remotes use <NAME>                   Uses the given remote by default
 
 ### Examples 
 

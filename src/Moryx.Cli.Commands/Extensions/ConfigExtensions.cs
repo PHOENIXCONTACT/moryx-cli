@@ -5,7 +5,7 @@ namespace Moryx.Cli.Commands.Extensions
 {
     public static class ConfigExtensions
     {
-        public static TemplateSettings AsTemplateSettings(this Config.Models.Configuration configuration, string dir, string solutionName, string profile = null)
+        public static TemplateSettings AsTemplateSettings(this Config.Models.Configuration configuration, string dir, string solutionName, string profile = "")
         {
             profile = string.IsNullOrEmpty(profile) ? configuration.DefaultProfile : profile;
             return new()

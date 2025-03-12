@@ -10,7 +10,7 @@ namespace Moryx.Cli.Templates.Models
         public required string AppName { get; set; }
         public string ProfileName { get; set; } = "default";
         public required string TargetDirectory { get; set; }
-        public string SourceDirectory { get => Path.Combine(TemplatesRoot(), Repository.FileSystemCompatible(), Branch); }
+        public string SourceDirectory { get => Path.Combine(TemplatesRoot(), Repository.AsFolderName(), Branch); }
 
 
         public string TemplatesRoot()

@@ -2,7 +2,7 @@ using Moryx.Cli.Templates.Extensions;
 
 namespace Moryx.Cli.Tests
 {
-    public class FileSystemCompatibleUrlTests
+    public class TemplateStringExtensionsTests
     {
 
         [SetUp]
@@ -14,7 +14,7 @@ namespace Moryx.Cli.Tests
         [TestCase("ssh://git@github.com:microsoft/vscode.git", "ssh_git@github.com_microsoft_vscode.git")]
         public void CheckUrlConversion(string input, string expected)
         {
-            var result = input.FileSystemCompatible();
+            var result = input.AsFolderName();
 
             Assert.That(result, Is.EqualTo(expected));
         }
