@@ -7,7 +7,12 @@ namespace Moryx.Cli.Commands
     {
         public static CommandResult Exec(Template template, Func<CommandResult> func)
         {
-            TemplateRepository.Clone(template.Settings);
+            return Exec(template.Settings, func);
+        }
+
+        public static CommandResult Exec(TemplateSettings settings, Func<CommandResult> func)
+        {
+            TemplateRepository.Clone(settings);
             return func();
         }
     }

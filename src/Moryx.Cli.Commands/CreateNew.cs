@@ -35,18 +35,18 @@ namespace Moryx.Cli.Commands
             var settings = config.AsTemplateSettings(dir, solutionName);
             settings.Pull = options.Pull;
 
-            string errorMessage = "";
-            var configuration = TemplateConfigurationFactory.Load(settings.SourceDirectory, error =>
+            return CommandBase.Exec(settings, () =>
             {
-                errorMessage = error;
-            });
-            if (configuration == null)
-                return CommandResult.WithError(errorMessage);
+                string errorMessage = "";
+                var configuration = TemplateConfigurationFactory.Load(settings.SourceDirectory, error =>
+                {
+                    errorMessage = error;
+                });
+                if (configuration == null)
+                    return CommandResult.WithError(errorMessage);
 
-            var template = Template.Load(settings, configuration);
+                var template = Template.Load(settings, configuration);
 
-            return CommandBase.Exec(template, () =>
-            {
                 Directory.CreateDirectory(solutionName);
                 CreateBareSolution(template);
                 config.Save(dir);
