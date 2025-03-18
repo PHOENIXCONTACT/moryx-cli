@@ -3,7 +3,7 @@
     public static class Solution
     {
 
-        public static void AssertSolution(string dir, Action<string> then, Action<string> onError)
+        public static void Assert(string dir, Action<string> then, Action<string> onError)
         {
             var solutionName = GetSolutionName(dir, onError);
             if (!string.IsNullOrEmpty(solutionName))
@@ -11,12 +11,6 @@
                 then(solutionName);
             }
         }
-
-        //public static string ReplaceProductName(this string str, string productName)
-        //    => str.Replace(ProductPlaceholder, productName);
-
-        //public static string ReplaceStepName(this string str, string stepName)
-        //    => str.Replace(ResourcePlaceholder, stepName);
 
         public static string GetSolutionName(string dir, Action<string> onError)
         {

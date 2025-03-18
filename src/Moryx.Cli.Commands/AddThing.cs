@@ -17,13 +17,13 @@ namespace Moryx.Cli.Commands
         /// <param name="resourceNames"></param>
         /// <param name="onAddedFiles"></param>
         /// <returns></returns>
-        public static CommandResult Exec(Template template, AddConfig config, Dictionary<string, string> fileStructure, Action<IEnumerable<string>>? onAddedFiles = null, StringReplacements? replacements = null)
+        public static CommandResult Exec(Template template, AddConfig config, Dictionary<string, string> fileStructure, Action<IEnumerable<string>>? onAddedFiles = null, Dictionary<string, string>? replacements = null)
         {
             return CommandBase.Exec(template, () =>
             {
                 try
                 {
-                    replacements ??= new StringReplacements(config);
+                    replacements ??= [];
 
                     var files = template.WriteFilesToDisk(
                         fileStructure
@@ -31,7 +31,7 @@ namespace Moryx.Cli.Commands
 
                     Template.ReplacePlaceHoldersInsideFiles(
                         files,
-                        replacements.FileContentPatterns);
+                        replacements);
 
                     onAddedFiles?.Invoke(files);
                 }
@@ -61,56 +61,5 @@ namespace Moryx.Cli.Commands
         /// Actual name identifiere of the *thing* to be added
         /// </summary>
         public required string ThingName { get; set; }
-
-        /// <summary>
-        /// *Thing*s placeholder
-        /// </summary>
-        public required IEnumerable<string> ThingPlaceholders { get; set; }
-    }
-
-    public class StringReplacements
-    {
-        public Dictionary<string, string> FileNamePatterns { get; }
-        public Dictionary<string, string> FileContentPatterns { get; }
-
-        public StringReplacements(AddConfig config)
-        {
-            FileNamePatterns = CreateDictionary(config);
-            FileContentPatterns = CreateDictionary(config);
-        }
-
-        public Dictionary<string, string> CreateDictionary(AddConfig config)
-        {
-            var result = config.ThingPlaceholders
-                .ToDictionary(s => s, s => config.ThingName);
-
-            result.TryAdd(Template.AppPlaceholder, config.SolutionName);
-            return result;
-        }
-
-
-        public StringReplacements AddFileNamePatterns(Dictionary<string, string> patterns)
-        {
-            foreach (var pattern in patterns)
-            {
-                if (!FileNamePatterns.ContainsKey(pattern.Key))
-                {
-                    FileNamePatterns.Add(pattern.Key, pattern.Value);
-                }
-            }
-            return this;
-        }
-
-        public StringReplacements AddContentPatterns(Dictionary<string, string> patterns)
-        {
-            foreach (var pattern in patterns)
-            {
-                if (!FileContentPatterns.ContainsKey(pattern.Key))
-                {
-                    FileContentPatterns.Add(pattern.Key, pattern.Value);
-                }
-            }
-            return this;
-        }
     }
 }

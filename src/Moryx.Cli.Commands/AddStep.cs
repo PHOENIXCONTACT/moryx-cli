@@ -16,17 +16,8 @@ namespace Moryx.Cli.Commands
                     SolutionName = template.AppName,
                     ThingName = step,
                     Thing = "step",
-                    ThingPlaceholders = [Template.StepPlaceholder],
                 };
-                var namespacePlaceholder = new Dictionary<string, string> {
-
-                    { $"{Template.AppPlaceholder}.Resources", $"{template.AppName}.Resources.{step}" },
-                    { $"{template.AppName}.Resources", $"{template.AppName}.Resources.{step}" }
-                };
-                var replacements = new StringReplacements(addConfig)
-                    .AddFileNamePatterns(namespacePlaceholder)
-                    .AddContentPatterns(namespacePlaceholder)
-                    ;
+                var namespacePlaceholder = template.ReplaceVariables(template.Configuration.Add.Step, step);
 
                 return AddThing.Exec(
                     template,
@@ -37,7 +28,7 @@ namespace Moryx.Cli.Commands
                         createdFiles.AddProjectsToSolution(template.Settings);
                         AddProjectsTests(createdFiles, template.Settings);
                     },
-                    replacements
+                    namespacePlaceholder
                 );
             });
         }

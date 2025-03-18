@@ -9,7 +9,7 @@ namespace Moryx.Cli.Remotes
         {
             CommandResult result = new();
             var currentDir = Environment.CurrentDirectory;
-            Templates.Solution.AssertSolution(
+            Templates.Solution.Assert(
                 currentDir,
                 then => result = ListRemotes(currentDir, onStatus),
                 error => result = CommandResult.WithError(error)

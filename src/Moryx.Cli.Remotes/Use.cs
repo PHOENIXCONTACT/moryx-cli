@@ -10,7 +10,7 @@ namespace Moryx.Cli.Remotes
             CommandResult result = new();
             var dir = Directory.GetCurrentDirectory();
             var solutionNameError = string.Empty;
-            Solution.AssertSolution(
+            Solution.Assert(
                 dir,
                 then => result = UseRemote(dir, options),
                 error => result = CommandResult.WithError(error)

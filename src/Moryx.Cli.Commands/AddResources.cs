@@ -16,11 +16,6 @@ namespace Moryx.Cli.Commands
                         SolutionName = template.AppName,
                         ThingName = $"{resource}Resource",
                         Thing = "resource",
-                        ThingPlaceholders =
-                        [
-                            Template.ResourcePlaceholder,
-                            Template.ResourcePlaceholder2
-                        ],
                     };
                     return AddThing.Exec(
                         template,

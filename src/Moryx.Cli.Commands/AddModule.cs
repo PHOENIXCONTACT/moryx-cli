@@ -17,7 +17,6 @@ namespace Moryx.Cli.Commands
                     SolutionName = template.AppName,
                     ThingName = moduleName,
                     Thing = "module",
-                    ThingPlaceholders = [Template.ModulePlaceholder],
                 },
                 template.Module(moduleName),
                 s => s.AddProjectsToSolution(template.Settings)

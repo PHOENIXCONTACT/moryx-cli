@@ -8,20 +8,13 @@ namespace Moryx.Cli.Templates
 {
     public class Template
     {
-        private List<string> _fileNames;
-        public const string AppPlaceholder = "MyApplication";
-        public const string ProductPlaceholder = "MyProduct";
-        public const string ModulePlaceholder = "MyModule";
-        public const string StepPlaceholder = "Some";
-        public const string CellPlaceholder = "SomeCell";
-        public const string StateBasePlaceholder = "SomeStateBase";
-        public const string StatePlaceholder = "SpecificState";
-        public const string ResourcePlaceholder = "SomeResource";
-        public const string ResourcePlaceholder2 = "MyResource";
+        private const string IdentifierKey = "{id}";
         private const string ResourceKey = "{resource}";
+        private const string SolutionNameKey = "{solutionname}";
         private const string TemplateFileExtension = ".moryxtpl";
-        private TemplateSettings _settings;
-        private TemplateConfiguration _configuration;
+        private readonly List<string> _fileNames;
+        private readonly TemplateSettings _settings;
+        private readonly TemplateConfiguration _configuration;
 
         public TemplateSettings Settings { get { return _settings; } }
         public TemplateConfiguration Configuration { get { return _configuration; } }
@@ -36,22 +29,34 @@ namespace Moryx.Cli.Templates
             _fileNames = files;
         }
 
+        /// <summary>
+        /// Loads a `Template` with provided `TemplateSettings` and
+        /// `TemplateConfiguration`
+        /// </summary>
+        /// <returns><see cref="Template"/></returns>
         public static Template Load(TemplateSettings settings, TemplateConfiguration configuration)
         {
             return new Template(
                 settings,
                 configuration,
-                GetCleanedResourceNames(settings)
+                SearchSourceFiles(settings)
             );
         }
 
-        public static Template Load(TemplateSettings settings, TemplateConfiguration configuration, List<string> files)
+        /// <summary>
+        /// Loads a `Template` with provided <paramref name="settings"/> and
+        /// <paramref name="configuration"/>. It takes a custom list of template <paramref name="fileNames"/>
+        /// that are to be used. By default, those <paramref name="fileNames"/> will be 
+        /// searched from the filesystem depending on <paramref name="settings"/>.
+        /// </summary>
+        /// <returns><see cref="Template"/></returns>
+        public static Template Load(TemplateSettings settings, TemplateConfiguration configuration, List<string> fileNames)
         {
-            var template = new Template(settings, configuration, files);
+            var template = new Template(settings, configuration, fileNames);
             return template;
         }
 
-        public static List<string> GetCleanedResourceNames(TemplateSettings settings)
+        public static List<string> SearchSourceFiles(TemplateSettings settings)
         {
             var files = Directory.GetFiles(
                 Path.Combine(settings.SourceDirectory),
@@ -62,7 +67,7 @@ namespace Moryx.Cli.Templates
                     RecurseSubdirectories = true
                 });
 
-            return files.ToList();
+            return [.. files];
         }
 
         public List<string> FilterByPattern(string root, ConfigurationPattern pattern)
@@ -96,7 +101,7 @@ namespace Moryx.Cli.Templates
         public Dictionary<string, string> NewProject()
             => FilteredFileStructure(_configuration.New);
 
-        private Dictionary<string, string> FilteredFileStructure(ConfigurationPattern pattern, string identifier = "", Dictionary<string, string> placeholders = null)
+        private Dictionary<string, string> FilteredFileStructure(ConfigurationPattern pattern, string identifier = "", Dictionary<string, string>? placeholders = null)
         {
             pattern = new ConfigurationPattern
             {
@@ -107,21 +112,68 @@ namespace Moryx.Cli.Templates
             return PrepareFileStructure(fileNames, pattern, identifier, placeholders);
         }
 
+        /// <summary>
+        /// Returns a dictionary of template files containing
+        /// their source location (key) inside the template repository
+        /// and their prepared/renamed target location (value) for
+        /// products
+        /// </summary>
+        /// <param name="name">Product name</param>
         public Dictionary<string, string> Product(string name)
             => FilteredFileStructure(_configuration.Add.Product, name);
-        
+
+
+        /// <summary>
+        /// Returns a dictionary of template files containing
+        /// their source location (key) inside the template repository
+        /// and their prepared/renamed target location (value) for
+        /// a `StateBase` file
+        /// </summary>
+        /// <param name="name">Resource implementing `IStateContext`</param>
         public Dictionary<string, string> StateBaseFile(string resourceName)
             => FilteredFileStructure(_configuration.Add.StateBase, "", new() { { ResourceKey, resourceName } });
 
+
+        /// <summary>
+        /// Returns a dictionary of template files containing
+        /// their source location (key) inside the template repository
+        /// and their prepared/renamed target location (value) for
+        /// states
+        /// </summary>
+        /// <param name="name">State name</param>
         public Dictionary<string, string> StateFile(string name, string resourceName)
             => FilteredFileStructure(_configuration.Add.State, name, new() { { ResourceKey, resourceName } });
 
+
+        /// <summary>
+        /// Returns a dictionary of template files containing
+        /// their source location (key) inside the template repository
+        /// and their prepared/renamed target location (value) for
+        /// steps
+        /// </summary>
+        /// <param name="name">Step name</param>
         public Dictionary<string, string> Step(string name)
             => FilteredFileStructure(_configuration.Add.Step, name);
 
+
+        /// <summary>
+        /// Returns a dictionary of template files containing
+        /// their source location (key) inside the template repository
+        /// and their prepared/renamed target location (value) for
+        /// modules
+        /// </summary>
+        /// <param name="name">Module name</param>
         public Dictionary<string, string> Module(string name)
             => FilteredFileStructure(_configuration.Add.Module, name);
 
+
+        /// <summary>
+        /// Returns a dictionary of template files containing
+        /// their source location (key) inside the template repository
+        /// and their prepared/renamed target location (value) for
+        /// resources
+        /// </summary>
+        /// <param name="name">Resource name</param>
         public Dictionary<string, string> Resource(string identifier)
             => FilteredFileStructure(_configuration.Add.Resource, identifier);
 
@@ -147,44 +199,52 @@ namespace Moryx.Cli.Templates
             await File.WriteAllTextAsync(file, text);
         }
 
-        public Dictionary<string, string> PrepareFileStructure(List<string> fileNames, ConfigurationPattern pattern, string identifier = "", Dictionary<string, string> placeholders = null)
+        /// <summary>
+        /// Prepares a dictionary for a list of filenames and their
+        /// destinations based on the provided pattern, optionally
+        /// an <paramref name="identifier"/> (e.g. a product name), 
+        /// and a custom dictionary of placeholders to be applied.
+        /// </summary>
+        public Dictionary<string, string> PrepareFileStructure(List<string> fileNames, ConfigurationPattern pattern, string identifier = "", Dictionary<string, string>? placeholders = null)
         {
             var patterns = ReplaceVariables(pattern, identifier, placeholders);
             return PrepareFileStructure(fileNames, patterns);
         }
 
+        /// <summary>
+        /// Prepares a dictionary for a list of filenames and prepares
+        /// their destinations based on the provided patterns
+        /// 
+        /// For example: 
+        /// `<"src/MyApplication.Products/MyProduct", "src/BigFactory.Products/Battery">`
+        /// </summary>
         public Dictionary<string, string> PrepareFileStructure(List<string> fileNames, Dictionary<string, string> patterns)
             => fileNames
-                .Select(f => new
-                {
-                    Key = f,
-                    Value = ReplacePlaceholders(f, patterns)
-                })
-                .ToDictionary(x => x.Key, x => x.Value);
+                .ToDictionary(
+                    f => f,
+                    f => ReplacePlaceholders(f, patterns)
+                );
 
         public Dictionary<string, string> ReplaceVariables(ConfigurationPattern pattern, string identifier = "", Dictionary<string, string>? variables = null)
         {
             var replacements = pattern.Replacements;
-            foreach(var replacement in _configuration.New.Replacements)
+            foreach (var replacement in _configuration.New.Replacements)
             {
                 replacements.TryAdd(replacement.Key, replacement.Value);
             }
 
             variables = variables ?? [];
-            variables.TryAdd("{id}", identifier);
-            variables.TryAdd("{solutionname}", _settings.AppName);
+            variables.TryAdd(IdentifierKey, identifier);
+            variables.TryAdd(SolutionNameKey, _settings.AppName);
 
             return replacements
-                .Select(r => new
-                {
-                    r.Key,
-                    Value = ApplyVariables(r.Value, variables)
-                })
-                .ToDictionary(x => x.Key, x => x.Value)
-                ;
+                .ToDictionary(
+                    r => r.Key,
+                    r => ApplyVariables(r.Value, variables)
+                );
         }
 
-        public static string ApplyVariables(string str, Dictionary<string, string> placeholders, int index = 0)
+        private static string ApplyVariables(string str, Dictionary<string, string> placeholders, int index = 0)
         {
             if (index >= placeholders.Count)
                 return str;

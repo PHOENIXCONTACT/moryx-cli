@@ -28,11 +28,8 @@ namespace Moryx.Cli.Commands
                     var files = template.WriteFilesToDisk(dictionary);
                     Template.ReplacePlaceHoldersInsideFiles(
                         files,
-                        new Dictionary<string, string>
-                        {
-                            { Template.AppPlaceholder, template.AppName },
-                            { Template.ProductPlaceholder, product },
-                        });
+                        template.ReplaceVariables(template.Configuration.Add.Product, product)
+                        );
 
                     UpdateProductConfig(template.Settings, product);
 

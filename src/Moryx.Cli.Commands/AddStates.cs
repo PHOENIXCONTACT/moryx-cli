@@ -30,10 +30,10 @@ namespace Moryx.Cli.Commands
             var targetPath = Path.Combine(Path.GetDirectoryName(resourceFile)!, "States");
             var newStateBaseFileName = Path.Combine(
                 targetPath,
-                Path.GetFileName(dictionary.Single().Value));
+                Path.GetFileName(dictionary.FirstOrDefault().Value));
 
             dictionary = new Dictionary<string, string> { { dictionary.FirstOrDefault().Key, newStateBaseFileName } };
-            
+
             if (!File.Exists(newStateBaseFileName))
             {
                 var files = template.WriteFilesToDisk(dictionary);
@@ -71,11 +71,13 @@ namespace Moryx.Cli.Commands
                 {
                     var stateFiles = template.StateFile(state, resource);
                     stateFiles = stateFiles
-                        .Select(file => new { file.Key, Value = Path.Combine(targetPath, $"{stateType}.cs")})
-                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                        
+                        .ToDictionary(
+                            file => file.Key,
+                            file => Path.Combine(targetPath, $"{stateType}.cs")
+                        );
 
-                            var filename = Path.Combine(targetPath, $"{stateType}.cs");
+
+                    var filename = Path.Combine(targetPath, $"{stateType}.cs");
                     if (!File.Exists(filename))
                     {
                         var files = template.WriteFilesToDisk(stateFiles);

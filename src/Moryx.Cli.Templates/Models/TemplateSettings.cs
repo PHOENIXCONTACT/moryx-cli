@@ -12,9 +12,6 @@ namespace Moryx.Cli.Templates.Models
         public required string TargetDirectory { get; set; }
         public virtual string SourceDirectory { get => Path.Combine(TemplatesRoot(), Repository.AsFolderName(), Branch); }
 
-        public TemplateSettings()
-        {
-        }
 
         public string TemplatesRoot()
            => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Moryx.Cli");
