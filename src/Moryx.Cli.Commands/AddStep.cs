@@ -1,5 +1,7 @@
-﻿using Moryx.Cli.Commands.Extensions;
+﻿using Moryx.Cli.Commands.Components;
+using Moryx.Cli.Commands.Extensions;
 using Moryx.Cli.Templates;
+using Moryx.Cli.Templates.Models;
 
 namespace Moryx.Cli.Commands
 {
@@ -20,12 +22,12 @@ namespace Moryx.Cli.Commands
 
                     { $"{Template.AppPlaceholder}.Resources", $"{template.AppName}.Resources.{step}" },
                     { $"{template.AppName}.Resources", $"{template.AppName}.Resources.{step}" }
-                };  
+                };
                 var replacements = new StringReplacements(addConfig)
                     .AddFileNamePatterns(namespacePlaceholder)
                     .AddContentPatterns(namespacePlaceholder)
                     ;
-                
+
                 return AddThing.Exec(
                     template,
                     addConfig,
@@ -33,10 +35,35 @@ namespace Moryx.Cli.Commands
                     (createdFiles) =>
                     {
                         createdFiles.AddProjectsToSolution(template.Settings);
+                        AddProjectsTests(createdFiles, template.Settings);
                     },
                     replacements
                 );
             });
+        }
+
+        private static void AddProjectsTests(IEnumerable<string> createdFiles, TemplateSettings settings)
+        {
+            var projectFiles = createdFiles
+               .Where(f => f.EndsWith(".csproj"))
+               .ToList();
+            var testFiles = createdFiles
+                .Where(f => f.ToLower().EndsWith("tests.cs") || f.ToLower().EndsWith("test.cs"))
+                .Select(Path.GetFullPath)
+                .Distinct()
+                .Select(p => Directory.GetFiles(Path.Combine(Path.GetDirectoryName(p) ?? "")))
+                .SelectMany(p => p)
+                .Where(f => f.EndsWith(".csproj"))
+                .ToList()
+                ?? [];
+
+            foreach (var testFile in testFiles)
+            {
+                foreach (var project in projectFiles)
+                {
+                    ProjectFileManipulation.AddProjectReference(testFile, project);
+                }
+            }
         }
     }
 }
