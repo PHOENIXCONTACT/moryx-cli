@@ -1,241 +1,192 @@
+using Moq;
 using Moryx.Cli.Templates;
-using Moryx.Cli.Tests.Extensions;
+using Moryx.Cli.Templates.Extensions;
+using Moryx.Cli.Templates.Models;
+using Moryx.Cli.Tests.CommandTests;
 
 namespace Moryx.Cli.Tests
 {
     public class TemplateTests
     {
-        private const int NumberOfResources = 56;
+        private Template _template;
+        private const int NumberOfFiles = 57;
         private const int NumberOfStepFiles = 10;
-        private const int NumberOfBareFilesCount = 28;
+        private const int NumberOfBareFiles = 28;
+        private const int NumberOfProductFiles = 2;
+        private const int NumberOfResourceFiles = 3;
+        private const int NumberOfModuleFiles = 8;
         private const string SolutionName = "UnitTestSolution";
+        private const string ModuleName = "ProcessEngine";
         private List<string> _resourceNames;
+
 
         [SetUp]
         public void Setup()
         {
+            var settingsMock = new Mock<TemplateSettings>();
+            settingsMock.SetupGet(m => m.SourceDirectory).Returns(DummyFileList.SourceDir());
+            settingsMock.Object.AppName = "PencilFactory";
+            var templateConfiguration = TemplateConfigurationFactory.Default();
             _resourceNames = DummyFileList.Get();
+
+            _template = Template.Load(settingsMock.Object, templateConfiguration, _resourceNames);
+
         }
 
         [Test]
-        public void CheckNumberOfResourceNames()
+        public void CheckNumberOfInitialFiles()
         {
             var list = _resourceNames;
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources));
-        }
-
-        [Test]
-        public void CheckProductFilesGetRemoved()
-        {
-            var list = _resourceNames
-                .WithoutProduct();
-
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 2));
+            Assert.That(list, Has.Count.EqualTo(NumberOfFiles));
         }
 
         [Test]
         public void CheckProductFilesGetReturned()
         {
-            var list = _resourceNames
-                .Product();
+            const string ProductName = "Pencil";
+            var list = _template.Product(ProductName)
+                .Select(kvp => kvp.Value)
+                .ToList();
 
-            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.That(list, Has.Count.EqualTo(NumberOfProductFiles));
+                Assert.That(list, HasAny.EndingWith(@"PencilInstance.cs"));
+                Assert.That(list, HasAny.EndingWith(@"PencilType.cs"));
+            });
         }
 
         [Test]
-        public void CheckStepFilesGetRemoved()
+        public void CheckStepFilesCount()
         {
-            var list = _resourceNames
-                .WithoutStep();
-
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources - NumberOfStepFiles));
-        }        
-        
-        [Test]
-        public void CheckModuleFilesGetRemoved()
-        {
-            var list = _resourceNames
-                .WithoutModule();
-
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 8));
-        }
-
-        [Test]
-        public void CheckRecipeFilesGetRemoved()
-        {
-            var list = _resourceNames
-                .WithoutRecipe();
-
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 1));
-        }
-
-        [Test]
-        public void CheckSetupTriggerFilesGetRemoved()
-        {
-            var list = _resourceNames
-                .WithoutSetupTrigger();
-
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 2));
-        }
-
-        [Test]
-        public void CheckCellSelectorFilesGetRemoved()
-        {
-            var list = _resourceNames
-                .WithoutCellSelector();
-
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 2));
-        }
-
-        [Test]
-        public void CheckStepFilesGetReturned()
-        {
-            var list = _resourceNames
-                .Step();
+            var list = _template
+                .Step("Assembling");
 
             Assert.That(list, Has.Count.EqualTo(NumberOfStepFiles));
         }
 
         [Test]
-        public void CheckStepFiles()
+        public void CheckStepFilesGetReturned()
         {
-            var list = _resourceNames
-                .Step();
+            var step = _template.Step("Malforming");
+
+            var list = step
+                .Select(kvp => kvp.Key)
+                .ToList();
 
             Assert.Multiple(() =>
             {
-                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication.Resources\MyApplication.Resources.csproj".OsAware()));
-                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication.Resources\SimulatedInOutDriver.cs".OsAware()));
-                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication.Resources\SomeCell.cs".OsAware()));
-                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Capabilities\SomeCapabilities.cs".OsAware()));
-                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Resources\ISomeResource.cs".OsAware()));
-                Assert.That(list, Does.Contain(@"C:\<path>\src\Tests\MyApplication.Tests\SomeResourceTest.cs".OsAware()));
-                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Activities\SomeStep\SomeActivity.cs".OsAware()));
-                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Activities\SomeStep\SomeActivityResults.cs".OsAware()));
-                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Activities\SomeStep\SomeParameters.cs".OsAware()));
-                Assert.That(list, Does.Contain(@"C:\<path>\src\MyApplication\Activities\SomeStep\SomeTask.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\MyApplication.Resources\MyApplication.Resources.csproj".OsAware()));
+                Assert.That(list, Does.Contain(@"src\MyApplication.Resources\SimulatedInOutDriver.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\MyApplication.Resources\SomeCell.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\MyApplication\Capabilities\SomeCapabilities.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\MyApplication\Resources\ISomeResource.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\Tests\MyApplication.Tests\SomeResourceTest.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\MyApplication\Activities\SomeStep\SomeActivity.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\MyApplication\Activities\SomeStep\SomeActivityResults.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\MyApplication\Activities\SomeStep\SomeParameters.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\MyApplication\Activities\SomeStep\SomeTask.cs".OsAware()));
+            });
+
+            list = step
+                .Select(kvp => kvp.Value)
+                .ToList();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(list, Does.Contain(@"src\PencilFactory.Resources.Malforming\PencilFactory.Resources.Malforming.csproj".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory.Resources.Malforming\SimulatedInOutDriver.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory.Resources.Malforming\MalformingCell.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory\Capabilities\MalformingCapabilities.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory\Resources\IMalformingResource.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\Tests\PencilFactory.Tests\MalformingResourceTest.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory\Activities\MalformingStep\MalformingActivity.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory\Activities\MalformingStep\MalformingActivityResults.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory\Activities\MalformingStep\MalformingParameters.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory\Activities\MalformingStep\MalformingTask.cs".OsAware()));
             });
         }
 
         [Test]
         public void CheckModuleFilesGetReturned()
         {
-            var list = _resourceNames
-                .Module();
+            var dictionary = _template
+                .Module(ModuleName);
 
-            Assert.That(list, Has.Count.EqualTo(8));
-        }
+            var list = dictionary
+                .Select(kvp => kvp.Value)
+                .ToList();
 
-        [Test]
-        public void CheckResourceFilesGetRemoved()
-        {
-            var list = _resourceNames
-                .WithoutResource();
+            Assert.That(list, Has.Count.EqualTo(NumberOfModuleFiles));
 
-            Assert.That(list, Has.Count.EqualTo(NumberOfResources - 3));
+            Assert.Multiple(() =>
+            {
+                Assert.That(list, Does.Contain(@"src\PencilFactory.ProcessEngine\Components\IMyComponent.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory.ProcessEngine\Facade\IMyFacade.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory.ProcessEngine\Facade\MyFacade.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory.ProcessEngine\Implementation\MyComponent.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory.ProcessEngine\ModuleController\ModuleConfig.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory.ProcessEngine\ModuleController\ModuleConsole.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory.ProcessEngine\ModuleController\ModuleController.cs".OsAware()));
+                Assert.That(list, Does.Contain(@"src\PencilFactory.ProcessEngine\PencilFactory.ProcessEngine.csproj".OsAware()));
+            });
         }
 
         [Test]
         public void CheckResourceFilesGetReturned()
         {
-            var list = _resourceNames
-                .Resource();
+            var dictionary = _template.Resource("Camera");
+
+            Assert.That(dictionary, Has.Count.EqualTo(NumberOfResourceFiles));
+
+            var keys = dictionary
+                .Select(kvp => kvp.Key)
+                .ToList();
 
             Assert.Multiple(() =>
             {
-                Assert.That(list, Has.Count.EqualTo(3));
-                Assert.That(list.First(s => s.EndsWith("ISomeResource.cs")), Is.Not.Null);
-                Assert.That(list.First(s => s.EndsWith(Path.DirectorySeparatorChar + "MyResource.cs")), Is.Not.Null);
-                Assert.That(list.First(s => s.EndsWith("MyResourceTest.cs")), Is.Not.Null);
+                Assert.That(keys[0], Does.EndWith("ISomeResource.cs".OsAware()));
+                Assert.That(keys[1], Does.EndWith(@"\MyResource.cs".OsAware()));
+                Assert.That(keys[2], Does.EndWith("MyResourceTest.cs".OsAware()));
+            });
+
+            var values = dictionary
+                .Select(kvp => kvp.Value)
+                .ToList();
+            Assert.Multiple(() =>
+            {
+                Assert.That(values[0], Does.EndWith(@"PencilFactory\Resources\ICameraResource.cs".OsAware()));
+                Assert.That(values[1], Does.EndWith(@"\CameraResource.cs".OsAware()));
+                Assert.That(values[2], Does.EndWith("CameraResourceTest.cs".OsAware()));
             });
         }
 
         [Test]
-        public void AllProjectFilesGetListed()
+        public void CheckStateFilesGetReturned()
         {
-            var list = _resourceNames;
-            var projects = Template.InitialProjects(list);
-
-            Assert.That(projects.Count, Is.EqualTo(8));
-        }
-
-        [Test]
-        public void ApplicationFilesGetCategorized()
-        {
-            var list = _resourceNames;
-            var projects = Template.InitialProjects(list);
-
-            var fileStructure = Template.PrepareFileStructure(SolutionName, list, projects);
-            var project = projects.First(p => p.Name == "MyApplication");
-
-            Assert.That(fileStructure[project], Has.Count.EqualTo(10));
-        }
-
-
-        [Test]
-        public void CheckRootFileCount()
-        {
-            var list = _resourceNames;
-            var projects = Template.InitialProjects(list);
-
-            var fileStructure = Template.PrepareFileStructure(SolutionName, list, projects);
-
-            Assert.That(fileStructure.Last().Value, Has.Count.EqualTo(7));
-            Assert.That(fileStructure.Last().Key.Name, Is.EqualTo(""));
-        }
-
-        [Test]
-        public void ModuleFilesGetCategorized()
-        {
-            var list = _resourceNames;
-            var projects = Template.InitialProjects(list);
-
-            var fileStructure = Template.PrepareFileStructure(SolutionName, list, projects);
-            var project = projects.First(p => p.Name == "MyApplication.MyModule");
-
-            Assert.That(fileStructure[project], Has.Count.EqualTo(8));
-        }
-
-        [Test]
-        public void BareFileStructureHasApplicationFiles()
-        {
-            var resourceNames = _resourceNames;
-            var projects = resourceNames.InitialProjects();
-            var filteredResourceNames = resourceNames.BareProjectFiles();
-
-            var fileStructure = Template.PrepareFileStructure(SolutionName, filteredResourceNames, projects);
-
-            var flattened = fileStructure.SelectMany(item => item.Value);
-            Assert.That(flattened.Count, Is.EqualTo(NumberOfBareFilesCount));
-        }
-
-        [Test]
-        public void FileCountForBareSetup()
-        {
-            var resourceNames = _resourceNames;
-            var filteredResourceNames = resourceNames.BareProjectFiles();
-
-            Assert.That(filteredResourceNames, Has.Count.EqualTo(NumberOfBareFilesCount));
-        }
-
-        [Test]
-        public void CheckStateFileGetsReturned()
-        {
-            var list = _resourceNames
-                .StateFile();
+            var list = _template
+                .StateFile("Initializing", "CameraDriver")
+                // The value does not need to be tested here, as it doesn't
+                // serve as the target path for the State file
+                .Select(kvp => kvp.Key)
+                .ToList();
 
             Assert.That(list, Has.Count.EqualTo(1));
-            Assert.That(list[0].EndsWith("SpecificState.cs"));
+            Assert.That(list[0], Is.EqualTo(@"src\MyApplication.Resources\SpecificState.cs".OsAware()));
         }
 
         [Test]
-        public void CheckStateBaseFileGetsReturned()
+        public void CheckStateBaseFilesGetReturned()
         {
-            var list = _resourceNames
-                .StateBaseFile();
+            var list = _template
+                .StateBaseFile("CameraDriver")
+                // The value does not need to be tested here, as it doesn't
+                // serve as the target path for the StateBase file
+                .Select(kvp => kvp.Key)
+                .ToList();
 
             Assert.That(list, Has.Count.EqualTo(1));
-            Assert.That(list[0].EndsWith("StateBase.cs"));
+            Assert.That(list[0], Is.EqualTo(@"src\MyApplication.Resources\StateBase.cs".OsAware()));
         }
     }
 }

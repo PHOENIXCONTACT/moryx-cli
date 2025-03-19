@@ -5,11 +5,15 @@ namespace Moryx.Cli.Commands
 {
     public class CommandBase
     {
-        public static CommandResult Exec(TemplateSettings settings, Func<List<string>, CommandResult> func)
+        public static CommandResult Exec(Template template, Func<CommandResult> func)
+        {
+            return Exec(template.Settings, func);
+        }
+
+        public static CommandResult Exec(TemplateSettings settings, Func<CommandResult> func)
         {
             TemplateRepository.Clone(settings);
-            var cleanedResourceNames = Template.GetCleanedResourceNames(settings);
-            return func(cleanedResourceNames);
+            return func();
         }
     }
 }

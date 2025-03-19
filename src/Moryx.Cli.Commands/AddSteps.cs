@@ -1,15 +1,15 @@
 ﻿using Moryx.Cli.Commands.Extensions;
-using Moryx.Cli.Templates.Models;
+using Moryx.Cli.Templates;
 
 namespace Moryx.Cli.Commands
 {
     public static class AddSteps
     {
-        public static CommandResult Exec(TemplateSettings settings, IEnumerable<string> cells)
+        public static CommandResult Exec(Template template, IEnumerable<string> cells)
         {
-            return CommandBase.Exec(settings, (filenames) 
+            return CommandBase.Exec(template, ()
                 => cells.Select(step => AddStep.Exec(
-                    settings,
+                    template,
                     step
                     ))
                     .ToArray()

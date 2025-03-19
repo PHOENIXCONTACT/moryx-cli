@@ -2,10 +2,8 @@
 using Moryx.Cli.Templates.Models;
 using Moryx.Cli.Commands.Extensions;
 using Moryx.Cli.Templates.StateBaseTemplate;
-using Moryx.Cli.Templates.Exceptions;
 using Moryx.Cli.Templates.StateTemplate;
 using Moryx.Cli.Templates.Components;
-using Moryx.AbstractionLayer.Resources;
 
 namespace Moryx.Cli.Commands
 {
@@ -14,42 +12,35 @@ namespace Moryx.Cli.Commands
         const string StateBase = "StateBase";
         const string SpecificState = "SpecificState";
 
-        internal static CommandResult Exec(TemplateSettings settings, string resource, IEnumerable<string> states, List<string> transitions)
+        internal static CommandResult Exec(Template template, string resource, IEnumerable<string> states, List<string> transitions)
         {
-            return CommandBase.Exec(settings, (fileNames) => Add(settings, fileNames, resource, states));
+            return CommandBase.Exec(template, () => Add(template, resource, states));
         }
 
-        private static CommandResult Add(TemplateSettings settings, List<string> cleanedResourceNames, string resource, IEnumerable<string> states)
+        private static CommandResult Add(Template template, string resource, IEnumerable<string> states)
         {
-            var resourceFile = FindResource(settings, resource);
+            var resourceFile = FindResource(template.Settings, resource);
             if (string.IsNullOrEmpty(resourceFile))
             {
                 return CommandResult.WithError($"`{resource}` not found. Make sure that a type `{resource}` exists in the project.");
             }
 
-            var projectFileNames = cleanedResourceNames.InitialProjects();
-            var stateBaseFileName = cleanedResourceNames.StateBaseFile();
 
-            var dictionary = Template.PrepareFileStructure(settings.AppName, stateBaseFileName, projectFileNames);
+            var dictionary = template.StateBaseFile(resource);
             var targetPath = Path.Combine(Path.GetDirectoryName(resourceFile)!, "States");
-            var newStateBaseFileName = Path.Combine(targetPath, $"{resource}StateBase.cs");
+            var newStateBaseFileName = Path.Combine(
+                targetPath,
+                Path.GetFileName(dictionary.FirstOrDefault().Value));
+
+            dictionary = new Dictionary<string, string> { { dictionary.FirstOrDefault().Key, newStateBaseFileName } };
 
             if (!File.Exists(newStateBaseFileName))
             {
-                var files = Template.WriteFilesToDisk(
-                    dictionary,
-                    settings,
-                    _ => newStateBaseFileName);
+                var files = template.WriteFilesToDisk(dictionary);
 
                 Template.ReplacePlaceHoldersInsideFiles(
                     files,
-                    new Dictionary<string, string>
-                    {
-                        { Template.AppPlaceholder, settings.AppName },
-                        { Template.StateBasePlaceholder, $"{resource}StateBase" },
-                        { Template.CellPlaceholder, $"{resource}" },
-                        { Template.ResourcePlaceholder, resource },
-                    });
+                    template.Configuration.Add.StateBase.Replacements);
 
                 if (!states.Any())
                 {
@@ -78,27 +69,22 @@ namespace Moryx.Cli.Commands
 
                 try
                 {
-                    var stateFileName = cleanedResourceNames.StateFile();
+                    var stateFiles = template.StateFile(state, resource);
+                    stateFiles = stateFiles
+                        .ToDictionary(
+                            file => file.Key,
+                            file => Path.Combine(targetPath, $"{stateType}.cs")
+                        );
 
-                    dictionary = Template.PrepareFileStructure(settings.AppName, stateFileName, projectFileNames);
+
                     var filename = Path.Combine(targetPath, $"{stateType}.cs");
                     if (!File.Exists(filename))
                     {
-                        var files = Template.WriteFilesToDisk(
-                        dictionary,
-                        settings,
-                        _ => filename);
+                        var files = template.WriteFilesToDisk(stateFiles);
 
                         Template.ReplacePlaceHoldersInsideFiles(
                             files,
-                            new Dictionary<string, string>
-                            {
-                            { Template.AppPlaceholder, settings.AppName },
-                            { Template.StatePlaceholder, stateType },
-                            { Template.ResourcePlaceholder, resource },
-                            { Template.CellPlaceholder, resource },
-                            { Template.StateBasePlaceholder, $"{resource}StateBase" },
-                            });
+                            template.Configuration.Add.State.Replacements);
 
                         stateBaseTemplate = stateBaseTemplate.AddState(stateType);
 
@@ -118,7 +104,7 @@ namespace Moryx.Cli.Commands
             stateBaseTemplate.SaveToFile(newStateBaseFileName);
 
             UpdateResource(
-                settings,
+                template.Settings,
                 resource,
                 success => msg.Add(success),
                 warning => warnings.Add(warning));

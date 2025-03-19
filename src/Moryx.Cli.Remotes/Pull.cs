@@ -10,7 +10,7 @@ namespace Moryx.Cli.Remotes
         {
             CommandResult result = new();
             var dir = Directory.GetCurrentDirectory();
-            Template.AssertSolution(
+            Templates.Solution.Assert(
                 dir,
                 then => result = PullRemote(dir, options, onStatus),
                 error => result = CommandResult.WithError(error)
@@ -22,7 +22,7 @@ namespace Moryx.Cli.Remotes
         {
             string remote = options.Name ?? "";
             var config = Config.Models.Configuration.Load(dir);
-            var solutionName = Template.GetSolutionName(dir, _ => { });
+            var solutionName = Templates.Solution.GetSolutionName(dir, _ => { });
 
             Templates.Models.TemplateSettings settings = config.AsTemplateSettings(dir, solutionName, remote);
             settings.Pull = true;

@@ -1,5 +1,5 @@
 using Moryx.Cli.Templates.Components;
-using Moryx.Cli.Tests.Extensions;
+using Moryx.Cli.Templates.Extensions;
 
 namespace Moryx.Cli.Tests.CSharpFileTests
 {
