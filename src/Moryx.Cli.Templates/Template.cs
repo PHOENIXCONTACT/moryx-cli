@@ -6,6 +6,29 @@ using System.Text.RegularExpressions;
 
 namespace Moryx.Cli.Templates
 {
+    /// <summary>
+    /// <see cref="Template"/> is used to bring copy files from a template
+    /// repository to the target solution as defined in a `.moryxtpl`. 
+    /// 
+    /// Central functions are
+    /// 
+    ///     * `WriteFilesToDisk()`
+    ///     * `ReplacePlaceHoldersInsideFiles()`
+    ///     * Everything that returns a dictionary as for example
+    ///       * `StateBaseFile()`
+    ///       * `Product()`
+    ///       * `Resource()`
+    ///       
+    /// </summary>
+    /// <example>
+    ///  var dictionary = template.Product(product);
+    ///
+    ///  var files = template.WriteFilesToDisk(dictionary);
+    ///  Template.ReplacePlaceHoldersInsideFiles(
+    ///      files,
+    ///      template.ReplaceVariables(template.Configuration.Add.Product, product)
+    ///  );
+    /// </example>
     public class Template
     {
         private const string IdentifierKey = "{id}";
@@ -177,7 +200,11 @@ namespace Moryx.Cli.Templates
         public Dictionary<string, string> Resource(string identifier)
             => FilteredFileStructure(_configuration.Add.Resource, identifier);
 
-
+        /// <summary>
+        /// Replaces placeholders in the files provided to <paramref name="filenames"/>.
+        /// </summary>
+        /// <param name="filenames">List of files to be updated</param>
+        /// <param name="dict">Dictionary of placeholders to be replaced</param>
         public static void ReplacePlaceHoldersInsideFiles(IEnumerable<string> filenames, Dictionary<string, string> dict)
         {
             var tasks = new List<Task>();
@@ -225,6 +252,13 @@ namespace Moryx.Cli.Templates
                     f => ReplacePlaceholders(f, patterns)
                 );
 
+        /// <summary>
+        /// Creates a dictionary of placeholders and their replacements
+        /// by updating variables (e.g. `{id}`, `{solutionname}`)
+        /// </summary>
+        /// <param name="pattern">a <see cref="ConfigurationPattern"/></param>
+        /// <param name="identifier">Will replace `{id}` in </param>
+        /// <param name="variables">Custom list of variables to be replaced. E.g. `<"{lang}", "Spanish">`</param>
         public Dictionary<string, string> ReplaceVariables(ConfigurationPattern pattern, string identifier = "", Dictionary<string, string>? variables = null)
         {
             var replacements = pattern.Replacements;
@@ -265,6 +299,12 @@ namespace Moryx.Cli.Templates
             return result;
         }
 
+        /// <summary>
+        /// Writes provided files to the file system
+        /// </summary>
+        /// <param name="dictionary">A dictionary of files to be copied `from` a source `to` a target</param>
+        /// <param name="force">Overwrite existing files if true</param>
+        /// <returns>List of written files</returns>
         public IEnumerable<string> WriteFilesToDisk(Dictionary<string, string> dictionary, bool force = false)
         {
             var result = new List<string>();
