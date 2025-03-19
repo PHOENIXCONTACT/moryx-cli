@@ -1,8 +1,7 @@
 ﻿using Moryx.Cli.Commands.Options;
-using Moryx.Cli.Template.Extensions;
-using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+using Moryx.Cli.Templates.Extensions;
 using Moryx.Cli.Commands.Extensions;
+using Moryx.Cli.Templates;
 
 namespace Moryx.Cli.Commands
 {
@@ -11,29 +10,55 @@ namespace Moryx.Cli.Commands
         public static CommandResult Solution(NewOptions options, Action<string> onStatus)
         {
             var solutionName = options.Name!;
+            var dir = Path.Combine(Directory.GetCurrentDirectory(), solutionName);
+
             if (Directory.Exists(solutionName))
             {
-                return CommandResult.WithError($"A directory {solutionName} already exists.");
+                if (options.Force)
+                {
+                    try
+                    {
+                        Directory.Delete(dir, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        return CommandResult.WithError(ex.Message);
+                    }
+                }
+                else
+                {
+                    return CommandResult.WithError($"A directory {solutionName} already exists.");
+                }
             }
-            var dir = Path.Combine(Directory.GetCurrentDirectory(), solutionName);
             var config = options.ToConfiguration();
             var settings = config.AsTemplateSettings(dir, solutionName);
             settings.Pull = options.Pull;
 
-            return CommandBase.Exec(settings, _ =>
+            return CommandBase.Exec(settings, () =>
             {
+                string errorMessage = "";
+                var configuration = TemplateConfigurationFactory.Load(settings.SourceDirectory, error =>
+                {
+                    errorMessage = error;
+                });
+                if (configuration == null)
+                    return CommandResult.WithError(errorMessage);
+
+                var template = Template.Load(settings, configuration);
+
                 Directory.CreateDirectory(solutionName);
-                CreateBareSolution(settings);
+                CreateBareSolution(template);
                 config.Save(dir);
 
+                var results = new List<CommandResult>();
                 if ((options.Steps ?? "").Any())
                 {
-                    AddSteps.Exec(settings, options.Steps!.ToCleanList());
+                    results.Add(AddSteps.Exec(template, options.Steps!.ToCleanList()));
                 }
 
                 if ((options.Products ?? "").Any())
                 {
-                    AddProducts.Exec(settings, options.Products!.ToCleanList());
+                    results.Add(AddProducts.Exec(template, options.Products!.ToCleanList()));
                 }
 
                 if (!options.NoGitInit)
@@ -41,32 +66,19 @@ namespace Moryx.Cli.Commands
                     InitializeGitRepo(settings.AppName, onStatus);
                 }
 
-                return CommandResult.IsOk($"Initialized new solution {solutionName}");
+                return CommandResult
+                    .IsOk($"Initialized new solution {solutionName}")
+                    .CouldHaveIssues(results);
             });
         }
 
-        private static void CreateBareSolution(TemplateSettings settings)
+        private static void CreateBareSolution(Template template)
         {
-            var cleanedResourceNames = Template.Template.GetCleanedResourceNames(settings);
-            var projectFilenames = cleanedResourceNames.InitialProjects();
-            var filteredResourceNames = cleanedResourceNames
-                .WithoutStep()
-                .WithoutProduct()
-                .WithoutRecipe()
-                .WithoutSetupTrigger()
-                .WithoutCellSelector()
-                .WithoutModule()
-                ;
+            var patterns = template.ReplaceVariables(template.Configuration.New);
+            var dictionary = template.NewProject();
 
-            var dictionary = Template.Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFilenames);
-
-            var files = Template.Template.WriteFilesToDisk(dictionary, settings, s => s);
-            Template.Template.ReplacePlaceHoldersInsideFiles(
-                files,
-                new Dictionary<string, string>
-                {
-                    { Template.Template.AppPlaceholder, settings.AppName }
-                });
+            var files = template.WriteFilesToDisk(dictionary);
+            Template.ReplacePlaceHoldersInsideFiles(files, patterns);
         }
 
         private static void InitializeGitRepo(string solutionName, Action<string> onStatus)

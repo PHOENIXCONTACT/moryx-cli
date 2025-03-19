@@ -1,5 +1,6 @@
-﻿using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+﻿using Moryx.Cli.Templates;
+using Moryx.Cli.Templates.Extensions;
+using Moryx.Cli.Templates.Models;
 using Moryx.Products.Management;
 using Moryx.Runtime.Kernel;
 
@@ -7,36 +8,30 @@ namespace Moryx.Cli.Commands
 {
     public class AddProducts
     {
-        public static CommandResult Exec(TemplateSettings settings, IEnumerable<string> products)
+        public static CommandResult Exec(Template template, IEnumerable<string> products)
         {
-            return CommandBase.Exec(settings, (fileNames) => Add(settings, fileNames, products));
+            return CommandBase.Exec(template, () =>
+            {
+                return Add(template, products);
+            });
         }
 
-        private static CommandResult Add(TemplateSettings settings, List<string> cleanedResourceNames, IEnumerable<string> products)
+        private static CommandResult Add(Template template, IEnumerable<string> products)
         {
-            var projectFileNames = cleanedResourceNames.InitialProjects();
-            var filteredResourceNames = cleanedResourceNames.Product();
-
             var msg = new List<string>();
             foreach (var product in products)
             {
                 try
                 {
-                    var dictionary = Template.Template.PrepareFileStructure(settings.AppName, filteredResourceNames, projectFileNames);
+                    var dictionary = template.Product(product);
 
-                    var files = Template.Template.WriteFilesToDisk(
-                        dictionary,
-                        settings,
-                        s => s.ReplaceProductName(product));
-                    Template.Template.ReplacePlaceHoldersInsideFiles(
+                    var files = template.WriteFilesToDisk(dictionary);
+                    Template.ReplacePlaceHoldersInsideFiles(
                         files,
-                        new Dictionary<string, string>
-                        {
-                            { Template.Template.AppPlaceholder, settings.AppName },
-                            { Template.Template.ProductPlaceholder, product },
-                        });
+                        template.ReplaceVariables(template.Configuration.Add.Product, product)
+                        );
 
-                    UpdateProductConfig(settings, product);
+                    UpdateProductConfig(template.Settings, product);
 
                     msg.Add($"Successfully added {product} product");
                 }

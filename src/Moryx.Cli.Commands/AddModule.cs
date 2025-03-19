@@ -1,58 +1,26 @@
-﻿using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
-using System.Text.RegularExpressions;
+﻿using Moryx.Cli.Commands.Components;
+using Moryx.Cli.Commands.Extensions;
+using Moryx.Cli.Templates;
+using Moryx.Cli.Templates.Models;
 
 namespace Moryx.Cli.Commands
 {
     public static class AddModule
     {
-        public static CommandResult Exec(TemplateSettings settings, string moduleName)
+        public static CommandResult Exec(Template template, string moduleName)
         {
-            return CommandBase.Exec(settings, (fileNames) =>
+            return CommandBase.Exec(template, () =>
                 AddThing.Exec(
-                settings,
+                template,
                 new AddConfig
                 {
-                    SolutionName = settings.AppName,
+                    SolutionName = template.AppName,
                     ThingName = moduleName,
                     Thing = "module",
-                    ThingPlaceholder = Template.Template.ModulePlaceholder,
                 },
-                fileNames.Module(),
-                s => AddProjectsToSolution(settings, s)
+                template.Module(moduleName),
+                s => s.AddProjectsToSolution(template.Settings)
                 ));            
-        }
-
-        private static void AddProjectsToSolution(TemplateSettings settings, IEnumerable<string> fileNames)
-        {
-            var projectFiles = fileNames
-                .Where(f => f.EndsWith(".csproj"))
-                .ToList();
-            var solutionFilename = Path.Combine(settings.TargetDirectory, $"{settings.AppName}.sln");
-            var rootGuid = GetRootGuid(solutionFilename);
-            if(projectFiles.Any())
-            {
-
-                foreach (var file in projectFiles)
-                {
-                    var filename = Path.GetFileNameWithoutExtension(file);
-                    var relativePath = Path.GetRelativePath(settings.TargetDirectory, file);
-                    var str = $"Project(\"{rootGuid}\") = \"{filename}\", \"{relativePath}\", \"{Guid.NewGuid()}\"\r\nEndProject\r\n";
-                    using var fileWriter = File.AppendText(solutionFilename);
-                    fileWriter.Write(str);
-                }
-            }
-        }
-
-        private static string GetRootGuid(string solutionFilename)
-        {
-            var lines = File.ReadAllText(Path.Combine(solutionFilename));
-            if (lines.Any())
-            {
-                var match = Regex.Match(lines, "Project.+(\\{.+\\}).+StartProject");
-                return match.Groups[1].Value;
-            }
-            return "";
         }
     }
 }

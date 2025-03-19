@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Moryx.Cli.Commands.Options;
+using System.Net;
 using System.Net.Http.Json;
 
 namespace Moryx.Cli.Commands
@@ -20,7 +21,10 @@ namespace Moryx.Cli.Commands
 
         internal static CommandResult PostSetup(ExecOptions options)
         {
-            var httpClient = new HttpClient();
+            var httpClient = new HttpClient(new HttpClientHandler
+            {
+                Proxy = new WebProxy { BypassProxyOnLocal = true }
+            });
 
             try
             {

@@ -29,16 +29,20 @@ namespace Moryx.Cli.CommandLine
             public bool NoGitInit { get; set; }
 
             [Description("A Git repository url that will be used for the project template.")]
-            [CommandOption("-t|--template-url"), DefaultValue("https://github.com/PHOENIXCONTACT/MORYX-Template.git")]
+            [CommandOption("-t|--template-url"), DefaultValue(DefaultValues.DefaultTemplate)]
             public string? Template { get; set; }
 
             [Description("Branch to use with the template repository.")]
-            [CommandOption("-b|--branch"), DefaultValue("machine")]
+            [CommandOption("-b|--branch"), DefaultValue(DefaultValues.DefaultBranch)]
             public string? Branch { get; set; }
 
             [Description("Update the template repository.")]
             [CommandOption("--pull"), DefaultValue(false)]
             public bool Pull { get; set; }
+
+            [Description("Force creation of the project. Existing files will be overwritten.")]
+            [CommandOption("-f|--force"), DefaultValue(false)]
+            public bool Force { get; set; }
         }
 
         public override int Execute([NotNull] CommandContext context, [NotNull] Settings settings)
@@ -52,6 +56,7 @@ namespace Moryx.Cli.CommandLine
                 Template = settings.Template,
                 Branch = settings.Branch,
                 Pull = settings.Pull,
+                Force = settings.Force,
             };
 
 

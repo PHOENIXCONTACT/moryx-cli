@@ -5,13 +5,24 @@ VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli", "src\Moryx.Cli\Moryx.Cli.csproj", "{13F36F0F-F879-4A52-99AE-ABF895F2D375}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Tests", "src\Moryx.Cli.Tests\Moryx.Cli.Tests.csproj", "{E65D2591-A889-4F42-A6F5-AECAFB77DBB0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Tests", "src\Tests\Moryx.Cli.Tests\Moryx.Cli.Tests.csproj", "{E65D2591-A889-4F42-A6F5-AECAFB77DBB0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Commands", "src\Moryx.Cli.Commands\Moryx.Cli.Commands.csproj", "{A05301A2-A68F-40BE-8ED9-0A8DF0CECFCE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Template", "src\Moryx.Cli.Template\Moryx.Cli.Template.csproj", "{FDE96997-1492-4FC1-AE66-E7F76A7B8374}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Templates", "src\Moryx.Cli.Templates\Moryx.Cli.Templates.csproj", "{FDE96997-1492-4FC1-AE66-E7F76A7B8374}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Config", "src\Moryx.Cli.Config\Moryx.Cli.Config.csproj", "{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6FC4CD2F-8BFA-4EC1-84A9-D3670BA92E4D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{81E6FB33-4958-4022-B93B-6B82B06AEE74}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.targets = Directory.Build.targets
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moryx.Cli.Commands.Tests", "src\Tests\Moryx.Cli.Commands.Tests\Moryx.Cli.Commands.Tests.csproj", "{4C082129-3A6D-4A72-80DC-8A9D3A71A79F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moryx.Cli.Remotes", "src\Moryx.Cli.Remotes\Moryx.Cli.Remotes.csproj", "{0C42AB23-AFA3-44B5-986C-BF7991275897}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,9 +50,21 @@ Global
 		{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6E69A2A-F183-4A01-8629-CEBBB0417ED6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C082129-3A6D-4A72-80DC-8A9D3A71A79F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C082129-3A6D-4A72-80DC-8A9D3A71A79F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C082129-3A6D-4A72-80DC-8A9D3A71A79F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C082129-3A6D-4A72-80DC-8A9D3A71A79F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C42AB23-AFA3-44B5-986C-BF7991275897}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C42AB23-AFA3-44B5-986C-BF7991275897}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C42AB23-AFA3-44B5-986C-BF7991275897}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C42AB23-AFA3-44B5-986C-BF7991275897}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E65D2591-A889-4F42-A6F5-AECAFB77DBB0} = {6FC4CD2F-8BFA-4EC1-84A9-D3670BA92E4D}
+		{4C082129-3A6D-4A72-80DC-8A9D3A71A79F} = {6FC4CD2F-8BFA-4EC1-84A9-D3670BA92E4D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {99BD1616-551D-473A-A6DB-6A9C0F030AB7}

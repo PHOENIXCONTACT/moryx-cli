@@ -1,7 +1,8 @@
-﻿using Moryx.Cli.Template.Extensions;
+﻿using Moryx.Cli.Templates.Extensions;
 using Moryx.Cli.Commands.Options;
-using Moryx.Cli.Template.Models;
+using Moryx.Cli.Templates.Models;
 using Moryx.Cli.Commands.Extensions;
+using Moryx.Cli.Templates;
 
 namespace Moryx.Cli.Commands
 {
@@ -9,31 +10,57 @@ namespace Moryx.Cli.Commands
     {
         public static CommandResult Step(AddOptions options)
         {
-            return AddThing(options, (settings) => AddSteps.Exec(settings, options.Name!.ToCleanList()));
+            return AddThing(options, (template) => AddSteps.Exec(template, options.Name!.ToCleanList()));
         }
 
         public static CommandResult Products(AddOptions options)
         {
-            return AddThing(options, (settings) => AddProducts.Exec(settings, options.Name!.ToCleanList()));
+            return AddThing(options, (template) => AddProducts.Exec(template, options.Name!.ToCleanList()));
+        }
+
+        public static CommandResult Resources(AddOptions options)
+        {
+            return AddThing(options, (template) => AddResources.Exec(template, options.Name!.ToCleanList()));
         }
 
         public static CommandResult Module(AddOptions options)
         {
-            return AddThing(options, (settings) => AddModule.Exec(settings, options.Name!));
+            return AddThing(options, (template) => AddModule.Exec(template, options.Name!));
         }
 
-        private static CommandResult AddThing(AddOptions options, Func<TemplateSettings, CommandResult> func)
+        public static CommandResult StateMachine(AddStatesOptions options)
+        {
+            var addOptions = new AddOptions
+            {
+                Branch = options.Branch,
+                Name = options.ResourceName,
+                Pull = options.Pull,
+                Template = options.Template,
+            };
+            var states = options.States?
+                .Split(',')
+                .Select(x => x.Trim())
+                .ToList() 
+                ?? new List<string>();
+            var transitions = options.States?
+                .Split(',')
+                .Select(x => x.Trim())
+                .ToList()
+                ?? new List<string>();
+            return AddThing(addOptions, (template) => AddStates.Exec(template, options.ResourceName!, states, transitions));
+        }
+
+        private static CommandResult AddThing(AddOptions options, Func<Template, CommandResult> func)
         {
             var currentDir = Environment.CurrentDirectory;
-            var solutionNameError = string.Empty;
-            var solutionName = Template.Template.GetSolutionName(currentDir, error =>
+            var errorMessage = string.Empty;
+            var solutionName = Solution.GetSolutionName(currentDir, error =>
             {
-                Console.WriteLine(error);
-                solutionNameError = error;
+                errorMessage = error;
             });
 
             if (string.IsNullOrEmpty(solutionName))
-                return CommandResult.WithError(solutionNameError);
+                return CommandResult.WithError(errorMessage);
 
             var dir = Path.GetFullPath(currentDir);
 
@@ -42,7 +69,16 @@ namespace Moryx.Cli.Commands
             settings.Branch = options.Branch ?? settings.Branch;
             settings.Pull = options.Pull;
 
-            return func(settings);
+            var configuration = TemplateConfigurationFactory.Load(settings.SourceDirectory, error =>
+            {
+                errorMessage = error;
+            });
+            if (configuration == null)
+                return CommandResult.WithError(errorMessage);
+
+            var template = Template.Load(settings, configuration);
+
+            return func(template);
         }
     }
 }

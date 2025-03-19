@@ -1,24 +1,16 @@
 ﻿using Moryx.Cli.Commands.Extensions;
-using Moryx.Cli.Template;
-using Moryx.Cli.Template.Models;
+using Moryx.Cli.Templates;
 
 namespace Moryx.Cli.Commands
 {
     public static class AddSteps
     {
-        public static CommandResult Exec(TemplateSettings settings, IEnumerable<string> cells)
+        public static CommandResult Exec(Template template, IEnumerable<string> cells)
         {
-            return CommandBase.Exec(settings, (fileNames) 
-                => cells.Select(step => AddThing.Exec(
-                    settings,
-                    new AddConfig
-                    {
-                        SolutionName = settings.AppName,
-                        ThingName = step,
-                        Thing = "step",
-                        ThingPlaceholder = Template.Template.StepPlaceholder,
-                    },
-                    fileNames.Step()
+            return CommandBase.Exec(template, ()
+                => cells.Select(step => AddStep.Exec(
+                    template,
+                    step
                     ))
                     .ToArray()
                     .Flatten());

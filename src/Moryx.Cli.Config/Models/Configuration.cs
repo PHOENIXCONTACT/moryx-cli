@@ -1,20 +1,29 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System.ComponentModel;
 
 namespace Moryx.Cli.Config.Models
 {
     public class Configuration
     {
-        public Dictionary<string, Profile> Profiles { get; set; }
+        private const string DefaultProfileName = "default";
 
-        public static Configuration Load(string directory) {
+        public required string DefaultProfile { get; set; } = DefaultProfileName;
+
+        public required Dictionary<string, Profile> Profiles { get; set; }
+
+        public static Configuration Load(string directory)
+        {
             try
             {
                 using var file = File.OpenText(GetFilename(directory));
                 var serializer = new JsonSerializer();
-                return (Configuration)serializer.Deserialize(file, typeof(Configuration))
-                    ?? DefaultConfiguration();
-            } catch (Exception)
+                var config = serializer.Deserialize(file, typeof(Configuration)) as Configuration ?? DefaultConfiguration();
+                config.DefaultProfile ??= DefaultProfileName;
+
+                return config;
+            }
+            catch (Exception)
             {
                 return DefaultConfiguration();
             }
@@ -24,6 +33,7 @@ namespace Moryx.Cli.Config.Models
         {
             return new Configuration
             {
+                DefaultProfile = "default",
                 Profiles = new Dictionary<string, Profile> { { "default",
                     new Profile
                     {
@@ -34,7 +44,7 @@ namespace Moryx.Cli.Config.Models
             };
         }
 
-        public void Save(string directory)  
+        public void Save(string directory)
         {
             using var file = File.CreateText(GetFilename(directory));
             var serializer = new JsonSerializer
