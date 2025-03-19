@@ -10,7 +10,6 @@ namespace Moryx.Cli.CommandLine
     [Description("Creates a new MORYX application project <NAME>.")]
     internal class New : Command<New.Settings>
     {
-
         internal class Settings : CommandSettings
         {
             [Description("Name of the project. Recommended to be PascalCase.")]

@@ -16,16 +16,16 @@ namespace Moryx.Cli.Templates
 
             if (!Directory.Exists(targetDir) || Directory.GetFiles(targetDir).Length == 0)
             {
-                return ExecCommanLine($"git clone {settings.Repository} -b {settings.Branch} --depth 1 --single-branch {targetDir}", _ => onStatus?.Invoke(_));
+                return ExecCommandLine($"git clone {settings.Repository} -b {settings.Branch} --depth 1 --single-branch {targetDir}", _ => onStatus?.Invoke(_));
             }
             else if (settings.Pull)
             {
-                return ExecCommanLine($"git -C {targetDir} pull", _ => onStatus?.Invoke(_));
+                return ExecCommandLine($"git -C {targetDir} pull", _ => onStatus?.Invoke(_));
             }
             return 0;
         }
 
-        public static int ExecCommanLine(string command, Action<string> onStatus)
+        public static int ExecCommandLine(string command, Action<string> onStatus)
         {
             var process = new Process
             {

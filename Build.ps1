@@ -1,7 +1,8 @@
 ﻿param (
     [switch]$Build,
     [switch]$Licensing,
-    [switch]$Pack
+    [switch]$Pack,
+    [switch]$Publish
 )
 
 # Load Toolkit
@@ -23,6 +24,10 @@ if ($Licensing) {
 
 if ($Pack) {
     Invoke-PackAll -Symbols
+}
+
+if ($Publish) {
+    dotnet nuget push "artifacts/packages/" --api-key $MORYX_NUGET_APIKEY --source $MORYX_PACKAGE_TARGET --skip-duplicate --symbol-api-key $MORYX_NUGET_APIKEY --symbol-source $MORYX_PACKAGE_TARGET_V3
 }
 
 Write-Host "Success!"

@@ -1,4 +1,5 @@
-﻿using Moryx.Cli.Commands.Options;
+﻿using System.Net;
+using Moryx.Cli.Commands.Options;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -55,6 +56,7 @@ namespace Moryx.Cli.Commands
     internal class ModuleResponse
     {
         public string? Name { get; set; }
+
         public string? HealthState { get; set; }
     }
 }

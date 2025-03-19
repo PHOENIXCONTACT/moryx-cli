@@ -5,11 +5,9 @@ namespace Moryx.Cli
 {
     internal class Program
     {
-
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            var app = new CommandApp()
-                .Setup();
+            var app = new CommandApp().Setup();
             app.Run(args);
         }
     }
