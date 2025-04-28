@@ -26,14 +26,29 @@ namespace Moryx.Cli.Commands
                     (createdFiles) =>
                     {
                         createdFiles.AddProjectsToSolution(template.Settings);
-                        AddProjectsTests(createdFiles, template.Settings);
+                        AddProjectsTests(createdFiles);
+                        AddProjectsStartupApplication(createdFiles, template.Settings);
                     },
                     namespacePlaceholder
                 );
             });
         }
 
-        private static void AddProjectsTests(IEnumerable<string> createdFiles, TemplateSettings settings)
+        private static void AddProjectsStartupApplication(IEnumerable<string> createdFiles, TemplateSettings settings)
+        {
+            var projectFiles = createdFiles
+               .Where(f => f.EndsWith(".csproj"))
+               .ToList();
+
+            var applicationProjectFile = Path.Combine(settings.TargetDirectory, "src", settings.AppName + ".App", settings.AppName + ".App.csproj");
+
+            foreach (var project in projectFiles)
+            {
+                ProjectFileManipulation.AddProjectReference(applicationProjectFile, project);
+            }
+        }
+
+        private static void AddProjectsTests(IEnumerable<string> createdFiles)
         {
             var projectFiles = createdFiles
                .Where(f => f.EndsWith(".csproj"))
