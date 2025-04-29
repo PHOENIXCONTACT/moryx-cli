@@ -1,7 +1,4 @@
-﻿using Castle.MicroKernel.Registration;
-using Microsoft.AspNetCore.Routing.Constraints;
-using Moryx.Container;
-using System.Xml;
+﻿using System.Xml;
 using System.Xml.Linq;
 
 namespace Moryx.Cli.Commands.Components
@@ -14,7 +11,8 @@ namespace Moryx.Cli.Commands.Components
         public static void AddProjectReference(string targetProjectFileName, string referenceProjectFileName)
         {
 
-            var referencePath = Path.GetRelativePath(targetProjectFileName, referenceProjectFileName);
+            var referencePath = Path.GetRelativePath(Path.GetDirectoryName(targetProjectFileName), Path.GetDirectoryName(referenceProjectFileName));
+            referencePath = Path.Combine(referencePath, Path.GetFileName(referenceProjectFileName));
 
             var projectFile = LoadXml(targetProjectFileName);
 
