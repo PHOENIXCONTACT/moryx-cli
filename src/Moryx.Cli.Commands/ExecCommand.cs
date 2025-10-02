@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using Moryx.Cli.Commands.Options;
-using System.Net;
 using System.Net.Http.Json;
 
 namespace Moryx.Cli.Commands

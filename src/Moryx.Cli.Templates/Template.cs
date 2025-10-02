@@ -32,7 +32,7 @@ namespace Moryx.Cli.Templates
     public class Template
     {
         private const string IdentifierKey = "{id}";
-        private const string ResourceKey = "{resource}";
+        public const string ResourceKey = "{resource}";
         private const string SolutionNameKey = "{solutionname}";
         private const string TemplateFileExtension = ".moryxtpl";
         private readonly List<string> _fileNames;
