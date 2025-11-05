@@ -14,8 +14,13 @@
 
         public static string GetSolutionName(string dir, Action<string> onError)
         {
-            var files = Directory.GetFiles(dir, "*.sln");
-            if (files != null)
+            var files = Directory.GetFiles(dir, "*.slnx");
+            if (files.Length == 0)
+            {
+                files = Directory.GetFiles(dir, "*.sln");
+            }
+
+            if (files.Length > 1)
             {
                 if (files.Length == 1)
                 {
@@ -23,11 +28,11 @@
                 }
                 if (files.Length > 1)
                 {
-                    onError("Too many `.sln` found. Please make sure, there is only one solution.");
+                    onError("Too many _solutions_ found. Please make sure, there is only one solution.");
                     return "";
                 }
             }
-            onError("No `.sln` found. Please make sure, there is a VisualStudio solution in this directory.");
+            onError("No _solutions_ found. Please make sure, there is a VisualStudio solution in this directory.");
             return "";
         }
     }
