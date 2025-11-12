@@ -8,7 +8,7 @@ namespace Moryx.Cli.Templates.Components
     {
         private SyntaxNode _root;
         
-        private NamespaceDeclarationSyntax? _namespaceDeclaration;
+        private BaseNamespaceDeclarationSyntax? _namespaceDeclaration;
         
         public List<string> Types { get; private set; }
 
@@ -23,7 +23,7 @@ namespace Moryx.Cli.Templates.Components
         }
 
 
-        public CSharpFile(string content) : base(content)
+        public  CSharpFile(string content) : base(content)
         {
             _root = _syntaxTree.GetRoot();
             Types = ScanTypes();
@@ -32,12 +32,16 @@ namespace Moryx.Cli.Templates.Components
 
         public static CSharpFile FromFile(string fileName)
         {
+            return new CSharpFile(ReadContent(fileName));
+        }
+
+        protected static string ReadContent(string fileName)
+        {
             if (!File.Exists(fileName))
             {
                 throw new FileNotFoundException(fileName);
             }
-            var content = File.ReadAllText(fileName);
-            return new CSharpFile(content);
+            return File.ReadAllText(fileName);
         }
 
         public List<string> ScanTypes()
@@ -49,18 +53,23 @@ namespace Moryx.Cli.Templates.Components
                 .ToList();
         }
 
-        private NamespaceDeclarationSyntax? ScanNamespace()
+        private BaseNamespaceDeclarationSyntax? ScanNamespace()
         {
             var root = _syntaxTree.GetRoot() as CompilationUnitSyntax;
-
-            return root?.DescendantNodes().OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
+            var nds = root?.DescendantNodes().OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
+            if(nds != null)
+            {
+                return nds;
+            }
+            return root?.DescendantNodes().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault();
         }
 
         private void UpdateNamespace(string @namespace)
         {
             if (_namespaceDeclaration != null)
             {
-                var newNamespace = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(@namespace)).NormalizeWhitespace();
+                var newName = SyntaxFactory.ParseName(@namespace);
+                var newNamespace = _namespaceDeclaration.WithName(newName);
                 _root = _root.ReplaceNode(_namespaceDeclaration, newNamespace);
                 _content = _root.ToFullString();
             }

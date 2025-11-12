@@ -8,7 +8,7 @@ using Moryx.Cli.Templates.Extensions;
 
 namespace Moryx.Cli.Templates.StateTemplate
 {
-    public class StateTemplate : CSharpFileBase
+    public class StateTemplate : CSharpFile
     {
         private const string StateContextInterface = "IStateContext";
 
@@ -16,14 +16,9 @@ namespace Moryx.Cli.Templates.StateTemplate
         {
         }
 
-        public static StateTemplate FromFile(string fileName)
+        public static new StateTemplate FromFile(string fileName)
         {
-            if (!File.Exists(fileName))
-            {
-                throw new FileNotFoundException(fileName);
-            }
-            var content = File.ReadAllText(fileName);
-            return new StateTemplate(content);
+            return new StateTemplate(ReadContent(fileName));
         }
 
         public StateTemplate ImplementIStateContext(string resource)
@@ -43,7 +38,7 @@ namespace Moryx.Cli.Templates.StateTemplate
             return new StateTemplate(root.ToFullString());
         }
 
-        
+
 
         private SyntaxNode TryToAddInitializing(SyntaxNode root, string context)
         {
@@ -91,8 +86,12 @@ namespace Moryx.Cli.Templates.StateTemplate
             var stateProperty = SyntaxFactory
                 .PropertyDeclaration(SyntaxFactory.ParseTypeName(context.StateBase()), "State")
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.InternalKeyword))
-                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
-                .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(SyntaxFactory.ParseExpression($"({context.StateBase()})CurrentState")))
+                .AddAccessorListAccessors(
+                    SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
+                    SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                        .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
+                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)))
                 .NormalizeWhitespace()
                 ;
 
@@ -103,7 +102,7 @@ namespace Moryx.Cli.Templates.StateTemplate
         private static SyntaxNode UpdateClassDefinition(SyntaxNode root, string context)
         {
             var contextClass = root.FindClass(context);
-            if(contextClass == null)
+            if (contextClass == null)
                 return root;
 
             if (!contextClass.BaseList?.Types.Any(t => ((IdentifierNameSyntax)t.Type).Identifier.ValueText == StateContextInterface) ?? false)
