@@ -14,19 +14,24 @@
 
         public static string GetSolutionName(string dir, Action<string> onError)
         {
-            var files = Directory.GetFiles(dir, "*.slnx");
-            if (files.Length == 0)
+            return GetSolutionName(Directory.GetFiles(dir, "*.sln*"), onError);
+        }
+
+        public static string GetSolutionName(string[] files, Action<string> onError)
+        {
+            string[] filteredFiles = [.. files.Where(f => f.EndsWith(".slnx"))];
+            if (filteredFiles.Length == 0)
             {
-                files = Directory.GetFiles(dir, "*.sln");
+                filteredFiles = [.. files.Where(f => f.EndsWith(".sln"))];
             }
 
-            if (files.Length > 1)
+            if (filteredFiles.Length > 0)
             {
-                if (files.Length == 1)
+                if (filteredFiles.Length == 1)
                 {
-                    return Path.GetFileNameWithoutExtension(files[0]);
+                    return Path.GetFileNameWithoutExtension(filteredFiles[0]);
                 }
-                if (files.Length > 1)
+                if (filteredFiles.Length > 1)
                 {
                     onError("Too many _solutions_ found. Please make sure, there is only one solution.");
                     return "";
