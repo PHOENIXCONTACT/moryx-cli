@@ -113,16 +113,3 @@ jobs:
           name: packages
           path: artifacts/packages/
         if: ${{ github.ref_name == 'dev' ||  github.ref_name == 'future' || (startsWith(github.ref, 'refs/tags/v')) }}
-
-  Create-Reports:
-    needs: [Build-Publish]
-    uses: moryx-industry/tools/.github/workflows/create-test-report.yml@v1
-    if: ${{ github.ref_name == 'dev' ||  github.ref_name == 'future' || (startsWith(github.ref, 'refs/tags/v')) }}
-                
-  Publish-Reports:
-    needs: [Create-Reports]
-    uses: moryx-industry/tools/.github/workflows/publish-test-coverage.yml@v1
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}     
-
