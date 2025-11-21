@@ -26,18 +26,15 @@ jobs:
         id: set-variables
         run: |
           if [[ ${{ github.ref_name }} =~ v[0-9]+.[0-9]+.[0-9]+ ]]; then
-            echo "MORYX_PACKAGE_TARGET=https://www.myget.org/F/moryx/api/v2/package" >> $GITHUB_OUTPUT
-            echo "MORYX_PACKAGE_TARGET_V3=https://www.myget.org/F/moryx/api/v3/index.json" >> $GITHUB_OUTPUT
+            echo "MORYX_PACKAGE_TARGET=https://api.nuget.org/v3/index.json" >> $GITHUB_OUTPUT
             echo "NPM_PACKAGE_SOURCE=//www.myget.org/F/moryx-ci/npm/" >> $GITHUB_OUTPUT
           else
             echo "MORYX_PACKAGE_TARGET=https://www.myget.org/F/moryx-ci/api/v2/package" >> $GITHUB_OUTPUT
-            echo "MORYX_PACKAGE_TARGET_V3=https://www.myget.org/F/moryx-ci/api/v3/index.json" >> $GITHUB_OUTPUT
             echo "NPM_PACKAGE_SOURCE=//www.myget.org/F/moryx-ci/npm/" >> $GITHUB_OUTPUT
           fi
     outputs:
       dotnet_sdk_version: ${{ env.dotnet_sdk_version }}
       MORYX_PACKAGE_TARGET: ${{ steps.set-variables.outputs.MORYX_PACKAGE_TARGET }}
-      MORYX_PACKAGE_TARGET_V3: ${{ steps.set-variables.outputs.MORYX_PACKAGE_TARGET_V3 }}
       NPM_PACKAGE_SOURCE: ${{ steps.set-variables.outputs.NPM_PACKAGE_SOURCE }}
 
   Tests:
