@@ -10,8 +10,12 @@ namespace Moryx.Cli.Commands.Components
 
         public static void AddProjectReference(string targetProjectFileName, string referenceProjectFileName)
         {
+            var targetProjectDirectory = Path.GetDirectoryName(targetProjectFileName);
+            var referenceProjectDirectory = Path.GetDirectoryName(referenceProjectFileName);
+            if(targetProjectDirectory == null || referenceProjectDirectory == null)
+                return;
 
-            var referencePath = Path.GetRelativePath(Path.GetDirectoryName(targetProjectFileName), Path.GetDirectoryName(referenceProjectFileName));
+            var referencePath = Path.GetRelativePath(targetProjectDirectory, referenceProjectDirectory);
             referencePath = Path.Combine(referencePath, Path.GetFileName(referenceProjectFileName));
 
             var projectFile = LoadXml(targetProjectFileName);

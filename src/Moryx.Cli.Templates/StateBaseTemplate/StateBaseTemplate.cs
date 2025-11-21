@@ -7,7 +7,7 @@ using Moryx.Cli.Templates.Exceptions;
 
 namespace Moryx.Cli.Templates.StateBaseTemplate
 {
-    public partial class StateBaseTemplate : CSharpFileBase
+    public partial class StateBaseTemplate : CSharpFile
     {
         private const string StateDefinitionAttributeName = "StateDefinition";
         private const string IsInitialParameterName = "IsInitial";
@@ -19,10 +19,9 @@ namespace Moryx.Cli.Templates.StateBaseTemplate
 
         public IEnumerable<StateDefinition> StateDeclarations { get; private set; } = [];
 
-        public static StateBaseTemplate FromFile(string fileName)
+        public new static StateBaseTemplate FromFile(string fileName)
         {
-            var content = File.ReadAllText(fileName);
-            return new StateBaseTemplate(content);
+            return new StateBaseTemplate(ReadContent(fileName));
         }
 
         private void Parse(SyntaxTree syntaxTree)
