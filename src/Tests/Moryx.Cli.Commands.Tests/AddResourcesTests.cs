@@ -52,7 +52,7 @@ namespace Moryx.Cli.Commands.Tests
         }
 
         [Test]
-        public void GivenAddingAResource_WhenExecCalled_ThenShouldNotReturnErrors()
+        public void ShouldNotReturnErrors()
         {
             var result = AddResources.Exec(_template, [ResourceName]);
 
@@ -60,7 +60,7 @@ namespace Moryx.Cli.Commands.Tests
         }
 
         [Test]
-        public void GivenAddingAResource_WhenExecCalled_ThenShouldCreateThreeFiles()
+        public void ShouldCreateThreeFiles()
         {
             AddResources.Exec(_template, [ResourceName]);
 
@@ -70,7 +70,17 @@ namespace Moryx.Cli.Commands.Tests
         }
 
         [Test]
-        public void GivenAddingAResource_WhenExecCalled_ThenShouldRenameNamespace()
+        public void ShouldRenameTestFile()
+        {
+            AddResources.Exec(_template, [ResourceName]);
+
+            var writtenFiles = Directory.GetFiles(_template.Settings.TargetDirectory, "*.cs", new EnumerationOptions { RecurseSubdirectories = true });
+
+            Assert.That(writtenFiles.Select(Path.GetFileName), Has.Some.EqualTo($"{ResourceName}ResourceTest.cs"));
+        }
+
+        [Test]
+        public void ShouldRenameNamespace()
         {
             AddResources.Exec(_template, [ResourceName]);
 

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(rtk find *)"
+      "Bash(rtk find *)",
+      "Bash(rtk git *)",
+      "Bash(rtk ls *)"
     ]
   }
 }
