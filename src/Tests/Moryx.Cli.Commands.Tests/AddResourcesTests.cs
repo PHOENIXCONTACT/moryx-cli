@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace Moryx.Cli.Commands.Tests
 {
-    public class RenamingOfResourceNamespace
+    public class AddResourcesTests
     {
         private Template _template = null!;
         private string _sourceDir = "";
@@ -52,22 +52,33 @@ namespace Moryx.Cli.Commands.Tests
         }
 
         [Test]
-        public void ShouldReplaceNamespace()
+        public void GivenAddingAResource_WhenExecCalled_ThenShouldNotReturnErrors()
         {
             var result = AddResources.Exec(_template, [ResourceName]);
 
             Assert.That(result.Errors, Is.Empty, string.Join(", ", result.Errors));
+        }
 
-            var writtenFiles = Directory.GetFiles(_template.Settings.TargetDirectory, "*.cs", new EnumerationOptions { RecurseSubdirectories = true }).ToList();
+        [Test]
+        public void GivenAddingAResource_WhenExecCalled_ThenShouldCreateThreeFiles()
+        {
+            AddResources.Exec(_template, [ResourceName]);
 
-            Assert.That(writtenFiles, Is.Not.Empty);
-            foreach (var file in writtenFiles)
-            {
-                var content = File.ReadAllText(file);
-                var ns = ExtractNamespace(content);
-                Assert.That(ns, Is.EqualTo($"{AppName}.Resources"),
-                    $"Namespace should be '{AppName}.Resources' but was '{ns}' in {file}");
-            }
+            var writtenFiles = Directory.GetFiles(_template.Settings.TargetDirectory, "*.cs", new EnumerationOptions { RecurseSubdirectories = true });
+
+            Assert.That(writtenFiles, Has.Length.EqualTo(3));
+        }
+
+        [Test]
+        public void GivenAddingAResource_WhenExecCalled_ThenShouldRenameNamespace()
+        {
+            AddResources.Exec(_template, [ResourceName]);
+
+            var namespaces = Directory
+                .GetFiles(_template.Settings.TargetDirectory, "*.cs", new EnumerationOptions { RecurseSubdirectories = true })
+                .Select(f => ExtractNamespace(File.ReadAllText(f)));
+
+            Assert.That(namespaces, Is.All.EqualTo($"{AppName}.Resources"));
         }
 
         private static string? ExtractNamespace(string content)
