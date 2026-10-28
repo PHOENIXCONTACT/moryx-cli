@@ -17,8 +17,10 @@ namespace Moryx.Cli.Commands.Tests
         [SetUp]
         public void Setup()
         {
-            _sourceDir = Directory.CreateTempSubdirectory("moryx_source_").FullName;
-            _targetDir = Directory.CreateTempSubdirectory("moryx_target_").FullName;
+            _sourceDir = Path.Combine(Path.GetTempPath(), $"moryx_source_{Path.GetRandomFileName()}");
+            _targetDir = Path.Combine(Path.GetTempPath(), $"moryx_target_{Path.GetRandomFileName()}");
+            Directory.CreateDirectory(_sourceDir);
+            Directory.CreateDirectory(_targetDir);
 
             const string templateContent =
                 "namespace MyApplication.Resources;\n" +
