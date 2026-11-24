@@ -17,10 +17,13 @@ namespace Moryx.Cli.Commands
                         ThingName = $"{resource}Resource",
                         Thing = "resource",
                     };
+                    var namespacePlaceholder = template.ReplaceVariables(template.Configuration.Add.Resource, resource);
+
                     return AddThing.Exec(
                         template,
                         addConfig,
-                        template.Resource(resource)
+                        template.Resource(resource),
+                        replacements: namespacePlaceholder
                     );
                 })
                 .ToArray()
